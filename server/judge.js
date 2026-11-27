@@ -116,7 +116,7 @@ async function runProgram(dir, stdin) {
     cmd = "prlimit";
     args = [...RUN_LIMITS, "--", "./a.out"];
   } else {
-    cmd = `./${EXE}`;
+    cmd = process.platform === "win32" ? path.join(dir, EXE) : `./${EXE}`;
     args = [];
   }
   const res = await spawnFile(cmd, args, {

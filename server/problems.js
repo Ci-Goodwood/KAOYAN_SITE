@@ -2735,7 +2735,147 @@ int main(void) {
       { name: "单结点", stdin: "1\n7\n" },
     ],
   },
+
+  "综合 5.3-12": {
+    title: "打印值为 x 的结点的所有祖先",
+    sig: "void PrintAnc(BiTree T, char x)",
+    ret: "无返回值。按由近及远的顺序输出 x 的各个祖先，每个字符后跟一个空格；x 不在树中则什么都不输出。",
+    vars: [
+      "BiTree：二叉链表，data 为字符。",
+      "假设值为 x 的结点不多于一个，x 本身不要输出。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空），后面跟一个字符 x；输出一行为祖先序列。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    char x = 0;
+    if (scanf(" %c", &x) != 1) return 0;
+    PrintAnc(T, x);
+    printf("\\n");
+    return 0;
+}`,
+    std: `int anc(BiTree T, char x) {
+    if (T == NULL) return 0;
+    if (T->data == x) return 1;
+    if (anc(T->lchild, x) || anc(T->rchild, x)) {
+        printf("%c ", T->data);
+        return 1;
+    }
+    return 0;
+}
+
+void PrintAnc(BiTree T, char x) {
+    anc(T, x);
+}`,
+    cases: [
+      { name: "叶子 E", stdin: "ABD##E##CF### E\n" },
+      { name: "叶子 F", stdin: "ABD##E##CF### F\n" },
+      { name: "根 A", stdin: "ABD##E##CF### A\n" },
+      { name: "不存在", stdin: "ABD##E##CF### Z\n" },
+    ],
+  },
+
+  "综合 5.3-15": {
+    title: "由满二叉树的先序序列求后序序列",
+    sig: "void PostOrder(char pre[], char post[], int n)",
+    ret: "无返回值。pre 是满二叉树的先序序列，post 用来装结果后序序列，下标都从 1 开始。",
+    vars: [
+      "n：结点个数，是 2 的幂减一。",
+      "满二叉树左右子树结点个数相等，各 (n-1)/2 个。",
+    ],
+    io: "第一行 n，第二行先序序列；输出一行为后序序列。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char pre[512], post[512];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (scanf("%511s", pre + 1) != 1) return 0;
+    PostOrder(pre, post, n);
+    for (i = 1; i <= n; ++i) printf("%c", post[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void pp(char pre[], int l1, int r1, char post[], int l2, int r2) {
+    int half;
+    if (l1 > r1) return;
+    half = (r1 - l1) / 2;
+    post[r2] = pre[l1];
+    pp(pre, l1 + 1, l1 + half, post, l2, l2 + half - 1);
+    pp(pre, l1 + half + 1, r1, post, l2 + half, r2 - 1);
+}
+
+void PostOrder(char pre[], char post[], int n) {
+    pp(pre, 1, n, post, 1, n);
+}`,
+    cases: [
+      { name: "三层", stdin: "7\nABDECFG\n" },
+      { name: "单结点", stdin: "1\nA\n" },
+      { name: "一层半", stdin: "3\nABC\n" },
+    ],
+  },
+
+  "综合 5.3-17": {
+    title: "判断两棵二叉树是否相似",
+    sig: "int Similar(BiTree T1, BiTree T2)",
+    ret: "相似返回 1，否则返回 0。相似指两棵都空、或根都存在且左右子树分别相似，不要求结点值相同。",
+    vars: [
+      "BiTree：二叉链表，data 为字符。",
+      "相似只看形状，不看 data。",
+    ],
+    io: "输入两行扩展先序序列（# 表示空），第一行是第一棵树、第二行是第二棵树；输出一行为 1 或 0。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T1 = BuildTree();
+    BiTree T2 = BuildTree();
+    printf("%d\\n", Similar(T1, T2));
+    return 0;
+}`,
+    std: `int Similar(BiTree T1, BiTree T2) {
+    if (T1 == NULL && T2 == NULL) return 1;
+    if (T1 == NULL || T2 == NULL) return 0;
+    return Similar(T1->lchild, T2->lchild) && Similar(T1->rchild, T2->rchild);
+}`,
+    cases: [
+      { name: "形状相同值不同", stdin: "ABD##E##CF###\nXYP##Q##RS###\n" },
+      { name: "形状不同", stdin: "ABD##E##CF###\nA#B##\n" },
+      { name: "都为空", stdin: "#\n#\n" },
+      { name: "一空一非空", stdin: "A##\n#\n" },
+    ],
+  },
+
+  "综合 5.3-19": {
+    title: "求二叉树的带权路径长度 WPL",
+    sig: "int WPL(BiTree T)",
+    ret: "返回所有叶结点带权路径长度之和；树空返回 0。",
+    vars: [
+      "BiTree：二叉链表，结点 data 是单个数字字符，表示该结点的权值。",
+      "只有叶结点计入，路径长度按根结点深度为 1 计算（即根到叶的边数加 1）。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空），结点值用 0-9 单个数字；输出一行为 WPL。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", WPL(T));
+    return 0;
+}`,
+    std: `int wpl(BiTree T, int d) {
+    if (T == NULL) return 0;
+    if (T->lchild == NULL && T->rchild == NULL) return (T->data - '0') * d;
+    return wpl(T->lchild, d + 1) + wpl(T->rchild, d + 1);
+}
+
+int WPL(BiTree T) {
+    return wpl(T, 1);
+}`,
+    cases: [
+      { name: "样例", stdin: "12##3##\n" },
+      { name: "三层", stdin: "12##3#4##\n" },
+      { name: "单结点", stdin: "5##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
 };
+
 
 
 
