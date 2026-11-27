@@ -3093,7 +3093,208 @@ int IsDAG(ALGraph G) {
       { name: "空表", stdin: "0\n" },
     ],
   },
+
+  "综合 5.3-04": {
+    title: "自下而上、从右到左的层次遍历",
+    sig: "void RevLevel(BiTree T)",
+    ret: "无返回值。按层从最底层往上输出，同一层内从右到左，每层占一行，结点之间不加空格。",
+    vars: [
+      "BiTree：二叉链表，data 为字符。",
+      "先做一遍普通层序把结点和层号记下来，再倒着读这段记录即可。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空结点）；输出若干行，每行是一层，从底层往上。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    RevLevel(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void RevLevel(BiTree T) {
+    BiTNode *q[1000];
+    int lev[1000];
+    int front = 0, rear = 0, i, cur;
+    if (T == NULL) return;
+    q[rear] = T;
+    lev[rear] = 1;
+    rear = rear + 1;
+    while (front < rear) {
+        BiTNode *p = q[front];
+        int l = lev[front];
+        front = front + 1;
+        if (p->lchild) { q[rear] = p->lchild; lev[rear] = l + 1; rear = rear + 1; }
+        if (p->rchild) { q[rear] = p->rchild; lev[rear] = l + 1; rear = rear + 1; }
+    }
+    cur = lev[rear - 1];
+    for (i = rear - 1; i >= 0; --i) {
+        if (lev[i] != cur) {
+            printf("\\n");
+            cur = lev[i];
+        }
+        printf("%c", q[i]->data);
+    }
+}`,
+    cases: [
+      { name: "三层", stdin: "ABD##E##CF###\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.4-04": {
+    title: "求孩子兄弟表示法存储的森林的叶结点数",
+    sig: "int LeafCount(BiTree T)",
+    ret: "返回森林中叶结点的个数；空森林返回 0。",
+    vars: [
+      "BiTree 在这道题里按孩子兄弟表示法使用：lchild 指向第一个孩子，rchild 指向下一个兄弟。",
+      "叶结点指没有孩子的结点，也就是 T->lchild 为空的结点。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空）；输出一行为叶结点数。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", LeafCount(T));
+    return 0;
+}`,
+    std: `int LeafCount(BiTree T) {
+    int n = 0;
+    if (T == NULL) return 0;
+    if (T->lchild == NULL) n = 1;
+    return n + LeafCount(T->lchild) + LeafCount(T->rchild);
+}`,
+    cases: [
+      { name: "三棵树", stdin: "AB#C#D#E##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空森林", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.4-05": {
+    title: "求孩子兄弟表示法存储的树的深度",
+    sig: "int TreeDepth(BiTree T)",
+    ret: "返回树的深度（只有根结点时为 1）；空树返回 0。",
+    vars: [
+      "BiTree 按孩子兄弟表示法使用：lchild 是第一个孩子，rchild 是下一个兄弟。",
+      "兄弟不增加层次，只有往孩子走才加一，所以对每个结点的孩子取最大深度再加一。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空）；输出一行为深度。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", TreeDepth(T));
+    return 0;
+}`,
+    std: `int TreeDepth(BiTree T) {
+    int d = 0, dc;
+    BiTNode *p;
+    if (T == NULL) return 0;
+    p = T->lchild;
+    while (p != NULL) {
+        dc = TreeDepth(p);
+        if (dc > d) d = dc;
+        p = p->rchild;
+    }
+    return d + 1;
+}`,
+    cases: [
+      { name: "两层", stdin: "AB#C#D#E##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "链式三层", stdin: "ABC#####\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 8.6-04": {
+    title: "把首元素放到排序后的正确位置",
+    sig: "void PlaceFirst(ElemType a[], int n)",
+    ret: "无返回值。把 a[1] 放到它在升序排列中应该待的位置上，要求比较次数不超过 n 次。",
+    vars: [
+      "a：无序数组，下标 1..n。",
+      "做法是先取出 a[1] 当枢轴，从两端向中间扫，比它大的往右挪、比它小的往左挪，一趟划分即可，这正是快速排序的一次划分。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为处理后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    PlaceFirst(a, n);
+    for (i = 1; i <= n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void PlaceFirst(ElemType a[], int n) {
+    ElemType p = a[1];
+    int low = 1, high = n;
+    while (low < high) {
+        while (low < high && a[high] >= p) high = high - 1;
+        a[low] = a[high];
+        while (low < high && a[low] <= p) low = low + 1;
+        a[high] = a[low];
+    }
+    a[low] = p;
+}`,
+    cases: [
+      { name: "乱序", stdin: "6\n4 5 1 2 6 3\n" },
+      { name: "首元素最小", stdin: "5\n1 9 8 7 6\n" },
+      { name: "首元素最大", stdin: "5\n9 1 2 3 4\n" },
+      { name: "单元素", stdin: "1\n7\n" },
+    ],
+  },
+
+  "综合 5.3-11": {
+    title: "删除以 x 为根的子树",
+    sig: "void DelSubtree(BiTree *T, char x)",
+    ret: "无返回值。在树中找到值为 x 的结点，删掉以它为根的整棵子树并释放空间；找不到就什么都不做。",
+    vars: [
+      "T：二级指针，删除根结点本身时要把 T 置空，所以必须传地址。",
+      "删子树要递归释放每个结点，不能只断指针。",
+    ],
+    io: "输入一行扩展先序序列（# 表示空），后面跟一个字符 x；输出一行为删除后的先序序列。",
+    pre: TREE_PRE,
+    post: `void FreeTree(BiTree T);
+int main(void) {
+    BiTree T = BuildTree();
+    char x = 0;
+    if (scanf(" %c", &x) != 1) return 0;
+    DelSubtree(&T, x);
+    PrintPre(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void FreeTree(BiTree T) {
+    if (T == NULL) return;
+    FreeTree(T->lchild);
+    FreeTree(T->rchild);
+    free(T);
+}
+
+int del(BiTree *T, char x) {
+    if (*T == NULL) return 0;
+    if ((*T)->data == x) {
+        FreeTree(*T);
+        *T = NULL;
+        return 1;
+    }
+    if (del(&(*T)->lchild, x)) return 1;
+    return del(&(*T)->rchild, x);
+}
+
+void DelSubtree(BiTree *T, char x) {
+    del(T, x);
+}`,
+    cases: [
+      { name: "删叶子", stdin: "ABD##E##CF### E\n" },
+      { name: "删内部结点", stdin: "ABD##E##CF### B\n" },
+      { name: "删根", stdin: "ABD##E##CF### A\n" },
+      { name: "不存在", stdin: "ABD##E##CF### Z\n" },
+    ],
+  },
 };
+
 
 
 
