@@ -1589,7 +1589,468 @@ int IsBST(BSTree T) {
       { name: "单顶点", stdin: "1 0\n1\n" },
     ],
   },
+
+  "综合 2.2-08": {
+    title: "把数组中前后两个线性表互换位置",
+    sig: "void SwapParts(ElemType a[], int m, int n)",
+    ret: "无返回值。a[1..m] 是第一个表，a[m+1..m+n] 是第二个表，处理后两段整体交换，内部顺序不变。",
+    vars: [
+      "a：一维数组，下标 1 开始，长度 m+n。",
+      "m、n：两段各自的长度。",
+      "要求空间 O(1)，用三次逆置最省。",
+    ],
+    io: "第一行 m n，第二行 m+n 个整数；输出一行为交换后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int m = 0, n = 0, i, tot;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+    tot = m + n;
+    for (i = 1; i <= tot; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    SwapParts(a, m, n);
+    for (i = 1; i <= tot; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void rev(ElemType a[], int l, int r) {
+    int t;
+    while (l < r) {
+        t = a[l];
+        a[l] = a[r];
+        a[r] = t;
+        l = l + 1;
+        r = r - 1;
+    }
+}
+
+void SwapParts(ElemType a[], int m, int n) {
+    rev(a, 1, m);
+    rev(a, m + 1, m + n);
+    rev(a, 1, m + n);
+}`,
+    cases: [
+      { name: "等长", stdin: "3 3\n1 2 3 4 5 6\n" },
+      { name: "前长后短", stdin: "4 2\n1 2 3 4 5 6\n" },
+      { name: "后段为空", stdin: "3 0\n7 8 9\n" },
+      { name: "单元素", stdin: "1 1\n1 2\n" },
+    ],
+  },
+
+  "综合 2.2-10": {
+    title: "数组循环左移 p 个位置",
+    sig: "void LeftShift(ElemType a[], int n, int p)",
+    ret: "无返回值。a[1..n] 循环左移 p 位，例如 1 2 3 4 5 左移 2 位得到 3 4 5 1 2。",
+    vars: [
+      "n：元素个数；p：左移位数，0 ≤ p < n。",
+      "要求时间 O(n)、空间 O(1)，用三次逆置。",
+    ],
+    io: "第一行 n p，第二行 n 个整数；输出一行为左移后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, p = 0, i;
+    if (scanf("%d %d", &n, &p) != 2) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    LeftShift(a, n, p);
+    for (i = 1; i <= n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void rev(ElemType a[], int l, int r) {
+    int t;
+    while (l < r) {
+        t = a[l];
+        a[l] = a[r];
+        a[r] = t;
+        l = l + 1;
+        r = r - 1;
+    }
+}
+
+void LeftShift(ElemType a[], int n, int p) {
+    if (p <= 0 || p >= n) return;
+    rev(a, 1, p);
+    rev(a, p + 1, n);
+    rev(a, 1, n);
+}`,
+    cases: [
+      { name: "左移 2", stdin: "5 2\n1 2 3 4 5\n" },
+      { name: "左移 n-1", stdin: "5 4\n1 2 3 4 5\n" },
+      { name: "不移动", stdin: "5 0\n1 2 3 4 5\n" },
+      { name: "单元素", stdin: "1 0\n9\n" },
+    ],
+  },
+
+  "综合 2.2-11": {
+    title: "求两个等长升序序列的中位数",
+    sig: "int Median(ElemType A[], ElemType B[], int L)",
+    ret: "返回把两个序列合并后第 L 个数的值（即下中位数）。",
+    vars: [
+      "A、B：长度都为 L 的升序数组，下标 1..L。",
+      "要求时间 O(log n)、空间 O(1)，用折半比较的做法。",
+    ],
+    io: "第一行 L，第二行 L 个数（A），第三行 L 个数（B）；输出一行为中位数。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType A[MAXN + 2], B[MAXN + 2];
+    int L = 0, i;
+    if (scanf("%d", &L) != 1) return 0;
+    for (i = 1; i <= L; ++i) {
+        if (scanf("%d", &A[i]) != 1) return 0;
+    }
+    for (i = 1; i <= L; ++i) {
+        if (scanf("%d", &B[i]) != 1) return 0;
+    }
+    printf("%d\\n", Median(A, B, L));
+    return 0;
+}`,
+    std: `int Median(ElemType A[], ElemType B[], int L) {
+    ElemType *a = A + 1, *b = B + 1;
+    int s1 = 0, d1 = L - 1, m1, s2 = 0, d2 = L - 1, m2;
+    while (s1 != d1 || s2 != d2) {
+        m1 = (s1 + d1) / 2;
+        m2 = (s2 + d2) / 2;
+        if (a[m1] == b[m2]) return a[m1];
+        if (a[m1] < b[m2]) {
+            if ((s1 + d1) % 2 == 0) {
+                s1 = m1;
+                d2 = m2;
+            } else {
+                s1 = m1 + 1;
+                d2 = m2;
+            }
+        } else {
+            if ((s1 + d1) % 2 == 0) {
+                d1 = m1;
+                s2 = m2;
+            } else {
+                d1 = m1;
+                s2 = m2 + 1;
+            }
+        }
+    }
+    return a[s1] < b[s2] ? a[s1] : b[s2];
+}`,
+    cases: [
+      { name: "样例", stdin: "5\n11 13 15 17 19\n2 4 6 8 20\n" },
+      { name: "相同中位数", stdin: "3\n1 5 9\n5 6 7\n" },
+      { name: "B 全大", stdin: "3\n1 2 3\n10 11 12\n" },
+      { name: "单元素", stdin: "1\n4\n7\n" },
+    ],
+  },
+
+  "综合 2.2-12": {
+    title: "求序列的主元素",
+    sig: "int Majority(ElemType a[], int n)",
+    ret: "存在主元素返回该元素，不存在返回 -1。主元素指出现次数超过 n/2 的元素。",
+    vars: [
+      "a：下标 1..n。",
+      "要求时间 O(n)、空间 O(1)，用摩尔投票的思路。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为主元素或 -1。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    printf("%d\\n", Majority(a, n));
+    return 0;
+}`,
+    std: `int Majority(ElemType a[], int n) {
+    int i, cand = a[1], cnt = 1, num = 0;
+    for (i = 2; i <= n; ++i) {
+        if (a[i] == cand) cnt = cnt + 1;
+        else {
+            if (cnt > 0) cnt = cnt - 1;
+            else {
+                cand = a[i];
+                cnt = 1;
+            }
+        }
+    }
+    if (cnt > 0) {
+        for (i = 1; i <= n; ++i) if (a[i] == cand) num = num + 1;
+    }
+    return (num > n / 2) ? cand : -1;
+}`,
+    cases: [
+      { name: "有主元素", stdin: "8\n3 3 4 3 3 5 3 3\n" },
+      { name: "无主元素", stdin: "6\n1 2 3 1 2 3\n" },
+      { name: "刚好过半", stdin: "7\n2 2 2 2 1 1 3\n" },
+      { name: "单元素", stdin: "1\n6\n" },
+    ],
+  },
+
+  "综合 2.2-13": {
+    title: "找出数组中未出现的最小正整数",
+    sig: "int FirstMissing(ElemType a[], int n)",
+    ret: "返回 1..n+1 中第一个没有出现在数组里的正整数。",
+    vars: [
+      "a：下标 1..n，元素是任意整数。",
+      "要求时间 O(n)，用 n 个辅助标记位即可。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为答案。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    printf("%d\\n", FirstMissing(a, n));
+    return 0;
+}`,
+    std: `int FirstMissing(ElemType a[], int n) {
+    int tag[MAXN + 2];
+    int i;
+    for (i = 0; i <= n + 1; ++i) tag[i] = 0;
+    for (i = 1; i <= n; ++i) {
+        if (a[i] >= 1 && a[i] <= n) tag[a[i]] = 1;
+    }
+    for (i = 1; i <= n; ++i) if (tag[i] == 0) return i;
+    return n + 1;
+}`,
+    cases: [
+      { name: "样例", stdin: "5\n-5 3 2 3 4\n" },
+      { name: "1 到 n 都有", stdin: "5\n1 2 3 4 5\n" },
+      { name: "全负数", stdin: "4\n-1 -2 -3 -4\n" },
+      { name: "有 0 和重复", stdin: "4\n0 1 1 2\n" },
+    ],
+  },
+
+  "综合 2.3-12": {
+    title: "删除递增单链表中的重复元素",
+    sig: "void DelDup(LinkList L)",
+    ret: "无返回值。L 带头结点且元素递增有序，处理后每个值只保留一个结点。",
+    vars: [
+      "L：带头结点的单链表，元素递增，重复元素相邻。",
+      "删结点时要释放空间。",
+    ],
+    io: "第一行 n，第二行 n 个递增整数；输出两行：新表长、剩余元素。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    DelDup(L);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DelDup(LinkList L) {
+    LNode *p = L->next, *q;
+    if (p == NULL) return;
+    while (p->next != NULL) {
+        if (p->data == p->next->data) {
+            q = p->next;
+            p->next = q->next;
+            free(q);
+        } else {
+            p = p->next;
+        }
+    }
+}`,
+    cases: [
+      { name: "多组重复", stdin: "7\n7 10 10 21 30 30 42\n" },
+      { name: "全相同", stdin: "5\n5 5 5 5 5\n" },
+      { name: "无重复", stdin: "4\n1 2 3 4\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
+
+  "综合 2.3-13": {
+    title: "两个递增链表归并为递减链表",
+    sig: "LinkList MergeDesc(LinkList A, LinkList B)",
+    ret: "返回合并后递减有序链表的头指针，表带表头结点；要求复用原结点，不新建数据结点。",
+    vars: [
+      "A、B：两个带头结点的递增单链表。",
+      "用头插法把较小者插入结果表头，得到的自然就是递减。",
+    ],
+    io: "第一行 n1，第二行 n1 个递增整数；第三行 n2，第四行 n2 个递增整数；输出两行：结果表长、递减序列。",
+    pre: LIST_PRE,
+    post: `LinkList mk(int n) {
+    LinkList L;
+    LNode *tail, *t;
+    int i, v;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return L;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    return L;
+}
+
+int main(void) {
+    int n1 = 0, n2 = 0, cnt = 0;
+    LinkList A, B, C;
+    LNode *p;
+    if (scanf("%d", &n1) != 1) return 0;
+    A = mk(n1);
+    if (scanf("%d", &n2) != 1) return 0;
+    B = mk(n2);
+    C = MergeDesc(A, B);
+    p = C->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = C->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `LinkList MergeDesc(LinkList A, LinkList B) {
+    LNode *pa = A->next, *pb = B->next, *q;
+    LinkList C = A;
+    C->next = NULL;
+    while (pa != NULL && pb != NULL) {
+        if (pa->data <= pb->data) {
+            q = pa;
+            pa = pa->next;
+        } else {
+            q = pb;
+            pb = pb->next;
+        }
+        q->next = C->next;
+        C->next = q;
+    }
+    while (pa != NULL) {
+        q = pa;
+        pa = pa->next;
+        q->next = C->next;
+        C->next = q;
+    }
+    while (pb != NULL) {
+        q = pb;
+        pb = pb->next;
+        q->next = C->next;
+        C->next = q;
+    }
+    B->next = NULL;
+    return C;
+}`,
+    cases: [
+      { name: "等长", stdin: "3\n1 3 5\n3\n2 4 6\n" },
+      { name: "B 为空", stdin: "3\n1 2 3\n0\n" },
+      { name: "含重复", stdin: "3\n1 2 2\n2\n2 9\n" },
+      { name: "A 为空", stdin: "0\n2\n7 8\n" },
+    ],
+  },
+
+  "综合 2.3-15": {
+    title: "求两个递增链表的交集",
+    sig: "LinkList Intersect(LinkList A, LinkList B)",
+    ret: "返回交集链表的头指针（带头结点），结果递增有序；要求不破坏 A、B 的结点，另建新结点。",
+    vars: [
+      "A、B：两个带头结点的递增单链表，元素可能重复。",
+      "交集里每个值只保留一个。",
+    ],
+    io: "第一行 n1，第二行 n1 个递增整数；第三行 n2，第四行 n2 个递增整数；输出两行：结果表长、交集序列。",
+    pre: LIST_PRE,
+    post: `LinkList mk(int n) {
+    LinkList L;
+    LNode *tail, *t;
+    int i, v;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return L;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    return L;
+}
+
+int main(void) {
+    int n1 = 0, n2 = 0, cnt = 0;
+    LinkList A, B, C;
+    LNode *p;
+    if (scanf("%d", &n1) != 1) return 0;
+    A = mk(n1);
+    if (scanf("%d", &n2) != 1) return 0;
+    B = mk(n2);
+    C = Intersect(A, B);
+    p = C->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = C->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `LinkList Intersect(LinkList A, LinkList B) {
+    LinkList C;
+    LNode *pa = A->next, *pb = B->next, *tail, *t;
+    C = (LinkList)malloc(sizeof(LNode));
+    C->data = 0;
+    C->next = NULL;
+    tail = C;
+    while (pa != NULL && pb != NULL) {
+        if (pa->data == pb->data) {
+            if (tail != C && tail->data == pa->data) {
+                pa = pa->next;
+                pb = pb->next;
+                continue;
+            }
+            t = (LNode *)malloc(sizeof(LNode));
+            t->data = pa->data;
+            t->next = NULL;
+            tail->next = t;
+            tail = t;
+            pa = pa->next;
+            pb = pb->next;
+        } else if (pa->data < pb->data) {
+            pa = pa->next;
+        } else {
+            pb = pb->next;
+        }
+    }
+    return C;
+}`,
+    cases: [
+      { name: "有交集", stdin: "5\n1 2 3 4 5\n4\n2 4 6 8\n" },
+      { name: "无交集", stdin: "3\n1 3 5\n3\n2 4 6\n" },
+      { name: "重复元素", stdin: "4\n2 2 3 5\n3\n2 3 5\n" },
+      { name: "一边为空", stdin: "0\n3\n1 2 3\n" },
+    ],
+  },
 };
+
 
 
 
