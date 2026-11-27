@@ -3293,7 +3293,195 @@ void DelSubtree(BiTree *T, char x) {
       { name: "不存在", stdin: "ABD##E##CF### Z\n" },
     ],
   },
+
+  "综合 4.2-02": {
+    title: "KMP 匹配，返回首次出现的位置",
+    sig: "int IndexOf(char *s, char *p)",
+    ret: "返回模式串在主串中首次出现的起始位置（从 1 开始计）；不存在返回 0。",
+    vars: [
+      "s：主串，p：模式串，都是 0 起始的普通字符串，长度用 strlen 取。",
+      "要求用 KMP，比较指针不回退；next 数组可以在函数内部自己算。",
+    ],
+    io: "第一行主串，第二行模式串；输出一行为位置或 0。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char s[512], p[256];
+    if (scanf("%511s", s) != 1) return 0;
+    if (scanf("%255s", p) != 1) return 0;
+    printf("%d\\n", IndexOf(s, p));
+    return 0;
+}`,
+    std: `void getnext(char *p, int next[]) {
+    int i = 0, j = -1, m = (int)strlen(p);
+    next[0] = -1;
+    while (i < m - 1) {
+        if (j == -1 || p[i] == p[j]) {
+            i = i + 1;
+            j = j + 1;
+            next[i] = j;
+        } else {
+            j = next[j];
+        }
+    }
+}
+
+int IndexOf(char *s, char *p) {
+    int next[256];
+    int i = 0, j = 0, n = (int)strlen(s), m = (int)strlen(p);
+    if (m == 0) return 1;
+    getnext(p, next);
+    while (i < n && j < m) {
+        if (j == -1 || s[i] == p[j]) {
+            i = i + 1;
+            j = j + 1;
+        } else {
+            j = next[j];
+        }
+    }
+    if (j >= m) return i - m + 1;
+    return 0;
+}`,
+    cases: [
+      { name: "样例", stdin: "aabaabaabaac\naabaac\n" },
+      { name: "从头匹配", stdin: "abcabcabd\nabcabd\n" },
+      { name: "不出现", stdin: "abcdefg\nxyz\n" },
+      { name: "单字符", stdin: "hello\nl\n" },
+    ],
+  },
+
+  "综合 5.2-05": {
+    title: "求顺序存储二叉树中两个结点的最近公共祖先",
+    sig: "int LCA(ElemType a[], int n, int i, int j)",
+    ret: "返回编号 i 和 j 的两个结点的最近公共祖先结点的值；i 或 j 超出 1..n 返回 0。",
+    vars: [
+      "a：完全二叉树的顺序存储，下标 1..n，a[0] 不用，根是 a[1]。",
+      "编号为 k 的结点，其父结点编号是 k/2（整除）。",
+    ],
+    io: "第一行 n，第二行 n 个整数（顺序存储的结点值），第三行 i j；输出一行为祖先值或 0。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i = 0, j = 0, k;
+    if (scanf("%d", &n) != 1) return 0;
+    for (k = 1; k <= n; ++k) {
+        if (scanf("%d", &a[k]) != 1) return 0;
+    }
+    if (scanf("%d %d", &i, &j) != 2) return 0;
+    printf("%d\\n", LCA(a, n, i, j));
+    return 0;
+}`,
+    std: `int LCA(ElemType a[], int n, int i, int j) {
+    int path[64], k = 0, p, t;
+    if (i < 1 || i > n || j < 1 || j > n) return 0;
+    p = i;
+    while (p >= 1 && k < 64) {
+        path[k] = p;
+        k = k + 1;
+        p = p / 2;
+    }
+    p = j;
+    while (p >= 1) {
+        for (t = 0; t < k; ++t) {
+            if (path[t] == p) return a[p];
+        }
+        p = p / 2;
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "兄弟", stdin: "7\n1 2 3 4 5 6 7\n4 5\n" },
+      { name: "跨层", stdin: "7\n1 2 3 4 5 6 7\n4 6\n" },
+      { name: "其中一个是祖先", stdin: "7\n1 2 3 4 5 6 7\n2 5\n" },
+      { name: "越界", stdin: "7\n1 2 3 4 5 6 7\n8 9\n" },
+    ],
+  },
+
+  "综合 7.3-08": {
+    title: "判断二叉树是否是平衡二叉树",
+    sig: "int IsBalanced(BSTree T)",
+    ret: "是平衡二叉树返回 1，否则返回 0；空树返回 1。",
+    vars: [
+      "BSTree：二叉链表，结点含 key、lchild、rchild。",
+      "平衡指每个结点的左右子树高度差不超过 1，要检查全部结点，不只看根。",
+    ],
+    io: "第一行 n，第二行 n 个整数（按插入顺序建树）；输出一行为 1 或 0。",
+    pre: BST_PRE,
+    post: `int main(void) {
+    int n = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildBST(n);
+    printf("%d\\n", IsBalanced(T));
+    return 0;
+}`,
+    std: `int hgt(BSTree T) {
+    int l, r;
+    if (T == NULL) return 0;
+    l = hgt(T->lchild);
+    r = hgt(T->rchild);
+    return (l > r ? l : r) + 1;
+}
+
+int IsBalanced(BSTree T) {
+    int l, r;
+    if (T == NULL) return 1;
+    l = hgt(T->lchild);
+    r = hgt(T->rchild);
+    if (l - r > 1 || r - l > 1) return 0;
+    return IsBalanced(T->lchild) && IsBalanced(T->rchild);
+}`,
+    cases: [
+      { name: "平衡", stdin: "7\n50 30 70 20 40 60 80\n" },
+      { name: "链状退化", stdin: "5\n10 20 30 40 50\n" },
+      { name: "单结点", stdin: "1\n9\n" },
+      { name: "空树", stdin: "0\n" },
+    ],
+  },
+
+  "综合 8.6-03": {
+    title: "计数排序",
+    sig: "void CountSort(ElemType a[], int n, ElemType b[])",
+    ret: "无返回值。把 a[1..n] 里的整数按升序写进 b[1..n]，a 不用改。",
+    vars: [
+      "a：待排数组，元素是 0 到 100 之间的整数，下标 1..n。",
+      "b：结果数组，下标也是 1..n。",
+      "做法：先统计每个值出现的次数，再把次数累加成前缀和，最后从后往前定位，保证稳定。",
+    ],
+    io: "第一行 n，第二行 n 个 0 到 100 的整数；输出一行为 b[1..n]。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2], b[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+        b[i] = 0;
+    }
+    CountSort(a, n, b);
+    for (i = 1; i <= n; ++i) printf("%d ", b[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void CountSort(ElemType a[], int n, ElemType b[]) {
+    int c[101];
+    int i;
+    for (i = 0; i <= 100; ++i) c[i] = 0;
+    for (i = 1; i <= n; ++i) c[a[i]] = c[a[i]] + 1;
+    for (i = 1; i <= 100; ++i) c[i] = c[i] + c[i - 1];
+    for (i = n; i >= 1; --i) {
+        b[c[a[i]]] = a[i];
+        c[a[i]] = c[a[i]] - 1;
+    }
+}`,
+    cases: [
+      { name: "乱序", stdin: "8\n49 38 65 97 76 13 27 49\n" },
+      { name: "含 0 和 100", stdin: "5\n100 0 50 0 100\n" },
+      { name: "全相同", stdin: "4\n7 7 7 7\n" },
+      { name: "单元素", stdin: "1\n5\n" },
+    ],
+  },
 };
+
 
 
 
