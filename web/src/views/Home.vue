@@ -1,6 +1,10 @@
 <template>
   <div>
-    <div class="hero">
+    <div class="site-banner reveal">
+      <img src="/images/login-bg.jpg" alt="站点头图" />
+    </div>
+
+    <div class="hero reveal">
       <div class="site-note">READ · THINK · CONNECT</div>
       <h1>从理论出发，理解我们的世界。</h1>
       <p>
@@ -19,7 +23,7 @@
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel reveal">
       <h2>学习板块</h2>
       <div class="sub">八个部分，数据结构与算法已经开放。</div>
 
@@ -57,17 +61,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { fetchIndex } from "../lib/api.js";
+import { animateNumber, refreshReveal } from "../lib/motion.js";
 
 const parts = ref([]);
-const totals = ref({});
 const loading = ref(true);
 const error = ref("");
 const sectionCount = ref(0);
-
-const singleCount = computed(() => totals.value.single || 0);
-const codeCount = computed(() => totals.value.code || 0);
+const singleCount = ref(0);
+const codeCount = ref(0);
 
 function two(n) {
   return String(n).padStart(2, "0");
@@ -77,15 +80,26 @@ onMounted(async () => {
   try {
     const d = await fetchIndex();
     parts.value = d.parts || [];
-    totals.value = d.totals || {};
-    sectionCount.value = (d.part1 || []).reduce(
+    const secs = (d.part1 || []).reduce(
       (sum, ch) => sum + (ch.sections || []).length,
       0
     );
+    const single = (d.totals || {}).single || 0;
+    const code = (d.totals || {}).code || 0;
+    animateNumber(secs, 800, (v) => {
+      sectionCount.value = v;
+    });
+    animateNumber(single, 1100, (v) => {
+      singleCount.value = v;
+    });
+    animateNumber(code, 900, (v) => {
+      codeCount.value = v;
+    });
   } catch (e) {
     error.value = String(e.message || e);
   } finally {
     loading.value = false;
+    setTimeout(refreshReveal, 60);
   }
 });
 </script>

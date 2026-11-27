@@ -17,13 +17,13 @@
         <p v-if="lead" class="lead">{{ lead }}</p>
       </div>
 
-      <div v-for="(tp, ti) in section.topics || []" :key="tp.id" class="topic">
+      <div v-for="(tp, ti) in section.topics || []" :key="tp.id" class="topic reveal">
         <div class="num">{{ two(ti + 1) }}</div>
         <div>
           <h2>{{ tp.title }}</h2>
           <Blocks :raw="(tp.content || []).join('\n')" />
 
-          <div v-if="(tp.exercises || []).length" class="exblock">
+          <div v-if="(tp.exercises || []).length" class="exblock reveal">
             <div class="label">随堂练习 · {{ tp.title }}</div>
             <template v-for="ex in tp.exercises" :key="ex.id">
               <Quiz v-if="ex.kind === '单选'" :ex="ex" />
@@ -40,7 +40,7 @@
         </div>
       </div>
 
-      <div v-if="(section.exercises || []).length" class="exblock">
+      <div v-if="(section.exercises || []).length" class="exblock reveal">
         <div class="label">本节练习</div>
         <template v-for="ex in section.exercises" :key="ex.id">
           <Quiz v-if="ex.kind === '单选'" :ex="ex" />
@@ -70,6 +70,7 @@ import Blocks from "../components/Blocks.vue";
 import Quiz from "../components/Quiz.vue";
 import Problem from "../components/Problem.vue";
 import { fetchChapter } from "../lib/api.js";
+import { refreshReveal } from "../lib/motion.js";
 
 const props = defineProps({
   chapterId: { type: String, default: "ch1" },
@@ -109,6 +110,7 @@ onMounted(async () => {
     error.value = String(e.message || e);
   } finally {
     loading.value = false;
+    setTimeout(refreshReveal, 80);
   }
 });
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <header class="topbar">
+  <header class="topbar" :class="{ scrolled: scrolled }">
     <a class="brand" href="#/">
       <img class="logo-mark" src="/images/logo.png" alt="端wood赐" />
       <span class="brandname">端wood赐</span><span class="sub">KAOYAN</span>
@@ -13,6 +13,7 @@
       >
       <a href="#/about" :class="{ on: route.name === 'about' }">关于</a>
     </nav>
+    <div class="readbar" :style="{ width: progress + '%' }"></div>
   </header>
 
   <main class="wrap">
@@ -34,11 +35,12 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import Home from "./views/Home.vue";
 import Learning from "./views/Learning.vue";
 import Lesson from "./views/Lesson.vue";
 import About from "./views/About.vue";
+import { refreshReveal } from "./lib/motion.js";
 
 function parse() {
   const raw = (location.hash || "").replace(/^#/, "") || "/";
@@ -56,12 +58,35 @@ function parse() {
 }
 
 const route = ref(parse());
+const scrolled = ref(false);
+const progress = ref(0);
+
+function onScroll() {
+  const y = window.scrollY || 0;
+  scrolled.value = y > 8;
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  progress.value = total > 0 ? Math.min(100, (y / total) * 100) : 0;
+}
 
 function onHash() {
   route.value = parse();
   window.scrollTo({ top: 0 });
+  nextTick(refreshReveal);
+  setTimeout(refreshReveal, 260);
+  setTimeout(refreshReveal, 900);
 }
 
-onMounted(() => window.addEventListener("hashchange", onHash));
-onUnmounted(() => window.removeEventListener("hashchange", onHash));
+watch(route, () => nextTick(refreshReveal));
+
+onMounted(() => {
+  window.addEventListener("hashchange", onHash);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+  refreshReveal();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("hashchange", onHash);
+  window.removeEventListener("scroll", onScroll);
+});
 </script>

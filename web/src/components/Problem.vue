@@ -28,7 +28,13 @@
     </div>
 
     <div class="actions">
-      <button v-if="ex.judge" class="btn" :disabled="loading" @click="submit">
+      <button
+        v-if="ex.judge"
+        class="btn"
+        :class="{ loading: loading }"
+        :disabled="loading"
+        @click="submit"
+      >
         {{ loading ? "判题中…" : "提交判题" }}
       </button>
       <button class="btn ghost" @click="showAnswer = !showAnswer">
@@ -37,7 +43,7 @@
       <button v-if="ex.judge" class="btn ghost" @click="reset">清空代码</button>
     </div>
 
-    <div v-if="result" class="result">
+    <div v-if="result" class="result" ref="resultBox">
       <div v-if="result.error" class="summary bad">{{ result.error }}</div>
 
       <div v-else-if="result.stage === 'compile'" class="summary bad">编译失败</div>
@@ -76,7 +82,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
 import Blocks from "./Blocks.vue";
 import CodeBlock from "./CodeBlock.vue";
 import { judge } from "../lib/api.js";
@@ -90,6 +96,7 @@ const meta = computed(() => props.ex.judgeMeta || {});
 const showAnswer = ref(false);
 const loading = ref(false);
 const result = ref(null);
+const resultBox = ref(null);
 const code = ref("");
 
 const STATUS = {
@@ -123,6 +130,12 @@ async function submit() {
     result.value = { error: String(e.message || e) };
   } finally {
     loading.value = false;
+  }
+  if (result.value) {
+    await nextTick();
+    if (resultBox.value) {
+      resultBox.value.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
   }
 }
 </script>
