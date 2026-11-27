@@ -2396,7 +2396,347 @@ void ReversePrint(LinkList L) {
       { name: "空表", stdin: "0\n0\n" },
     ],
   },
+
+  "综合 2.3-14": {
+    title: "由两个链表的公共元素生成新链表",
+    sig: "LinkList Common(LinkList A, LinkList B)",
+    ret: "返回新链表 C 的头指针（带头结点），元素递增；要求不破坏 A、B，结点全部新建。",
+    vars: [
+      "A、B：两个带头结点的递增单链表。",
+      "依次比较，相等就复制一个结点接到 C 尾部，谁小谁前进。",
+    ],
+    io: "第一行 n1，第二行 n1 个递增整数；第三行 n2，第四行 n2 个递增整数；输出两行：C 的表长、C 的元素。",
+    pre: LIST_PRE,
+    post: `LinkList mk(int n) {
+    LinkList L;
+    LNode *tail, *t;
+    int i, v;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return L;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    return L;
+}
+
+int main(void) {
+    int n1 = 0, n2 = 0, cnt = 0;
+    LinkList A, B, C;
+    LNode *p;
+    if (scanf("%d", &n1) != 1) return 0;
+    A = mk(n1);
+    if (scanf("%d", &n2) != 1) return 0;
+    B = mk(n2);
+    C = Common(A, B);
+    p = C->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = C->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `LinkList Common(LinkList A, LinkList B) {
+    LinkList C;
+    LNode *pa = A->next, *pb = B->next, *tail, *t;
+    C = (LinkList)malloc(sizeof(LNode));
+    C->data = 0;
+    C->next = NULL;
+    tail = C;
+    while (pa != NULL && pb != NULL) {
+        if (pa->data == pb->data) {
+            t = (LNode *)malloc(sizeof(LNode));
+            t->data = pa->data;
+            t->next = NULL;
+            tail->next = t;
+            tail = t;
+            pa = pa->next;
+            pb = pb->next;
+        } else if (pa->data < pb->data) {
+            pa = pa->next;
+        } else {
+            pb = pb->next;
+        }
+    }
+    return C;
+}`,
+    cases: [
+      { name: "有公共", stdin: "5\n1 3 5 7 9\n4\n3 5 8 9\n" },
+      { name: "完全重合", stdin: "3\n1 2 3\n3\n1 2 3\n" },
+      { name: "无公共", stdin: "3\n1 3 5\n3\n2 4 6\n" },
+      { name: "一边为空", stdin: "3\n1 2 3\n0\n" },
+    ],
+  },
+
+  "综合 2.3-16": {
+    title: "判断序列 B 是否为 A 的连续子序列",
+    sig: "int IsSubSeq(LinkList A, LinkList B)",
+    ret: "是连续子序列返回 1，否则返回 0；B 为空时返回 1。",
+    vars: [
+      "A、B：两个带头结点的单链表，元素为整数。",
+      "连续子序列指 B 的全部结点在 A 中一段连续位置上逐个相等，不是子集。",
+    ],
+    io: "第一行 n1，第二行 n1 个整数；第三行 n2，第四行 n2 个整数；输出一行为 1 或 0。",
+    pre: LIST_PRE,
+    post: `LinkList mk(int n) {
+    LinkList L;
+    LNode *tail, *t;
+    int i, v;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return L;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    return L;
+}
+
+int main(void) {
+    int n1 = 0, n2 = 0;
+    LinkList A, B;
+    if (scanf("%d", &n1) != 1) return 0;
+    A = mk(n1);
+    if (scanf("%d", &n2) != 1) return 0;
+    B = mk(n2);
+    printf("%d\\n", IsSubSeq(A, B));
+    return 0;
+}`,
+    std: `int IsSubSeq(LinkList A, LinkList B) {
+    LNode *pa, *pb, *start;
+    if (B->next == NULL) return 1;
+    start = A->next;
+    while (start != NULL) {
+        pa = start;
+        pb = B->next;
+        while (pa != NULL && pb != NULL && pa->data == pb->data) {
+            pa = pa->next;
+            pb = pb->next;
+        }
+        if (pb == NULL) return 1;
+        start = start->next;
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "是子序列", stdin: "6\n1 2 3 4 5 6\n3\n3 4 5\n" },
+      { name: "不是", stdin: "6\n1 2 3 4 5 6\n3\n1 3 5\n" },
+      { name: "后缀", stdin: "5\n7 8 9 10 11\n2\n10 11\n" },
+      { name: "B 为空", stdin: "3\n1 2 3\n0\n" },
+    ],
+  },
+
+  "综合 2.3-19": {
+    title: "反复找出并删除最小结点，直到表空",
+    sig: "void DelMinAll(LinkList L)",
+    ret: "无返回值。每轮找到当前最小值结点，输出它的值（后面跟一个空格），然后删除并释放，直到表空。",
+    vars: [
+      "L：带头结点的单链表，元素为正整数。",
+      "输出顺序就是删除顺序，由小到大。",
+    ],
+    io: "第一行 n，第二行 n 个正整数；输出一行为依次删掉的值。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v;
+    LinkList L;
+    LNode *tail, *t;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    DelMinAll(L);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DelMinAll(LinkList L) {
+    LNode *pre, *p, *minpre, *minp;
+    while (L->next != NULL) {
+        pre = L;
+        p = L->next;
+        minpre = L;
+        minp = L->next;
+        while (p != NULL) {
+            if (p->data < minp->data) {
+                minp = p;
+                minpre = pre;
+            }
+            pre = p;
+            p = p->next;
+        }
+        printf("%d ", minp->data);
+        minpre->next = minp->next;
+        free(minp);
+    }
+}`,
+    cases: [
+      { name: "乱序", stdin: "5\n3 1 9 2 7\n" },
+      { name: "含重复", stdin: "5\n4 2 4 1 2\n" },
+      { name: "已升序", stdin: "4\n1 2 3 4\n" },
+      { name: "单结点", stdin: "1\n8\n" },
+    ],
+  },
+
+  "综合 2.3-24": {
+    title: "删除绝对值重复的结点",
+    sig: "void DelAbsDup(LinkList L, int n)",
+    ret: "无返回值。元素满足 |data| 不大于 n，删掉绝对值已经出现过的后续结点，只保留第一次出现的那个。",
+    vars: [
+      "L：带头结点的单链表，data 为整数，|data| ≤ n。",
+      "可以用 n+1 个标记位，时间 O(n)。",
+    ],
+    io: "第一行 n（既是结点数也是绝对值上限），第二行 n 个整数；输出两行：新表长、剩余元素。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    DelAbsDup(L, n);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DelAbsDup(LinkList L, int n) {
+    int *tag = (int *)malloc(sizeof(int) * (n + 1));
+    LNode *pre = L, *p = L->next, *q;
+    int i, a;
+    for (i = 0; i <= n; ++i) tag[i] = 0;
+    while (p != NULL) {
+        a = p->data >= 0 ? p->data : -p->data;
+        if (tag[a]) {
+            q = p;
+            pre->next = p->next;
+            p = p->next;
+            free(q);
+        } else {
+            tag[a] = 1;
+            pre = p;
+            p = p->next;
+        }
+    }
+    free(tag);
+}`,
+    cases: [
+      { name: "样例", stdin: "5\n2 -1 -2 3 1\n" },
+      { name: "无重复", stdin: "4\n1 -2 3 -4\n" },
+      { name: "全同绝对值", stdin: "4\n4 -4 4 -4\n" },
+      { name: "单结点", stdin: "1\n-1\n" },
+    ],
+  },
+
+  "综合 2.3-25": {
+    title: "把链表重排成首尾交替的形式",
+    sig: "void Reorder(LinkList L)",
+    ret: "无返回值。把 a1,a2,...,an 重排成 a1,an,a2,a(n-1),... 的形式，只用 O(1) 辅助空间。",
+    vars: [
+      "L：带头结点的单链表，长度 n 未知，需要先求长度或找中点。",
+      "思路：找中点断开，后半逆置，再交替合并。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出两行：表长、重排后的序列。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    Reorder(L);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void Reorder(LinkList L) {
+    LNode *p, *q, *r, *s;
+    int n = 0, i;
+    p = L->next;
+    while (p != NULL) {
+        n = n + 1;
+        p = p->next;
+    }
+    if (n <= 2) return;
+    p = L->next;
+    for (i = 1; i < (n + 1) / 2; ++i) p = p->next;
+    q = p->next;
+    p->next = NULL;
+    r = NULL;
+    while (q != NULL) {
+        s = q->next;
+        q->next = r;
+        r = q;
+        q = s;
+    }
+    p = L->next;
+    q = r;
+    while (q != NULL) {
+        s = p->next;
+        r = q->next;
+        p->next = q;
+        q->next = s;
+        p = s;
+        q = r;
+    }
+}`,
+    cases: [
+      { name: "六结点", stdin: "6\n1 2 3 4 5 6\n" },
+      { name: "五结点", stdin: "5\n1 2 3 4 5\n" },
+      { name: "两结点", stdin: "2\n1 2\n" },
+      { name: "单结点", stdin: "1\n7\n" },
+    ],
+  },
 };
+
 
 
 
