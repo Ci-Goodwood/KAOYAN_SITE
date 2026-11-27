@@ -303,4 +303,216 @@ ${printSqList()}`,
       { name: "空表", stdin: "0\n1\n" },
     ],
   },
+  "综合 2.2-01": {
+    title: "删除顺序表中最小值",
+    sig: "int DelMin(SqList *L)",
+    ret: "返回被删掉的最小值；若表为空返回 -1。删完后空出的位置由表尾元素填补，L->length 要减 1。",
+    vars: [
+      "L->data：元素数组，L->length 当前表长。",
+      "返回值：最小值本身，不是下标。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出三行：返回值、新表长、剩余元素。",
+    pre: SQLIST_PRE,
+    post: `int main(void) {
+    SqList L;
+    int n = 0, i, r;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXSIZE) n = MAXSIZE;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &L.data[i]) != 1) return 0;
+    }
+    L.length = n;
+    r = DelMin(&L);
+    printf("%d\\n", r);
+    printf("%d\\n", L.length);
+    for (i = 0; i < L.length; ++i) printf("%d ", L.data[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `int DelMin(SqList *L) {
+    int i, k = 0;
+    ElemType e;
+    if (L->length == 0) return -1;
+    for (i = 1; i < L->length; ++i) {
+        if (L->data[i] < L->data[k]) k = i;
+    }
+    e = L->data[k];
+    L->data[k] = L->data[L->length - 1];
+    L->length = L->length - 1;
+    return e;
+}`,
+    cases: [
+      { name: "样例", stdin: "6\n5 3 9 1 7 2\n" },
+      { name: "单元素", stdin: "1\n4\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
+
+  "综合 2.2-05": {
+    title: "无序顺序表删除区间 [s, t]",
+    sig: "int DelST(SqList *L, ElemType s, ElemType t)",
+    ret: "返回 1 表示参数合法且处理完成；返回 0 表示 s 与 t 不合理或表为空，此时表保持原样。",
+    vars: [
+      "s、t：删除区间端点，要求 s < t，两端都删。",
+      "L：元素无序，删除后不要求重新排序，但要保持原有相对次序。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 s 与 t；输出三行：返回值、新表长、剩余元素。",
+    pre: SQLIST_PRE,
+    post: `int main(void) {
+    SqList L;
+    int n = 0, i, r;
+    int s = 0, t = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXSIZE) n = MAXSIZE;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &L.data[i]) != 1) return 0;
+    }
+    L.length = n;
+    if (scanf("%d %d", &s, &t) != 2) return 0;
+    r = DelST(&L, s, t);
+    printf("%d\\n", r);
+    printf("%d\\n", L.length);
+    for (i = 0; i < L.length; ++i) printf("%d ", L.data[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `int DelST(SqList *L, ElemType s, ElemType t) {
+    int i, k = 0;
+    if (s >= t || L->length == 0) return 0;
+    for (i = 0; i < L->length; ++i) {
+        if (L->data[i] < s || L->data[i] > t) {
+            L->data[k] = L->data[i];
+            ++k;
+        }
+    }
+    L->length = k;
+    return 1;
+}`,
+    cases: [
+      { name: "区间命中若干", stdin: "6\n5 2 9 1 7 3\n2 5\n" },
+      { name: "s 不小于 t", stdin: "4\n1 2 3 4\n5 2\n" },
+      { name: "清空整表", stdin: "3\n3 4 5\n2 6\n" },
+      { name: "空表", stdin: "0\n1 2\n" },
+    ],
+  },
+
+  "综合 2.2-07": {
+    title: "合并两个有序顺序表",
+    sig: "void MergeList(SqList *A, SqList *B, SqList *C)",
+    ret: "无返回值。合并结果写进 C，C 的 length 由函数负责设置成合并后的长度。",
+    vars: [
+      "A、B：两个递增有序表，函数内不得改动它们的元素。",
+      "C：结果表，调用前 length 已置 0，data 空间足够，直接写 C->data 并设置 C->length。",
+    ],
+    io: "第一行 n1，第二行 n1 个递增整数；第三行 n2，第四行 n2 个递增整数；输出 C 的表长与全部元素。",
+    pre: SQLIST_PRE,
+    post: `int main(void) {
+    SqList A, B, C;
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXSIZE) n = MAXSIZE;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &A.data[i]) != 1) return 0;
+    }
+    A.length = n;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXSIZE) n = MAXSIZE;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &B.data[i]) != 1) return 0;
+    }
+    B.length = n;
+    C.length = 0;
+    MergeList(&A, &B, &C);
+    printf("%d\\n", C.length);
+    for (i = 0; i < C.length; ++i) printf("%d ", C.data[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void MergeList(SqList *A, SqList *B, SqList *C) {
+    int i = 0, j = 0, k = 0;
+    while (i < A->length && j < B->length) {
+        if (A->data[i] <= B->data[j]) {
+            C->data[k] = A->data[i];
+            ++i;
+        } else {
+            C->data[k] = B->data[j];
+            ++j;
+        }
+        ++k;
+    }
+    while (i < A->length) {
+        C->data[k] = A->data[i];
+        ++i;
+        ++k;
+    }
+    while (j < B->length) {
+        C->data[k] = B->data[j];
+        ++j;
+        ++k;
+    }
+    C->length = k;
+}`,
+    cases: [
+      { name: "等长交错", stdin: "3\n1 3 5\n3\n2 4 6\n" },
+      { name: "B 为空", stdin: "3\n1 2 3\n0\n" },
+      { name: "A 为空", stdin: "0\n1\n7\n" },
+      { name: "含重复", stdin: "3\n1 1 3\n2\n1 2\n" },
+    ],
+  },
+
+  "综合 2.3-09": {
+    title: "查找单链表倒数第 k 个结点",
+    sig: "int FindK(LinkList L, int k)",
+    ret: "返回倒数第 k 个结点的 data 值；k 不合法或长度不足时返回 -1。",
+    vars: [
+      "L：带头结点的单链表，数据从 L->next 开始。",
+      "k：以 1 为起点的倒数序号。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 k；输出一行为查到的值或 -1。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, k = 0, r;
+    LinkList L;
+    LNode *tail, *t;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d", &k) != 1) return 0;
+    r = FindK(L, k);
+    printf("%d\\n", r);
+    return 0;
+}`,
+    std: `int FindK(LinkList L, int k) {
+    LNode *p, *q;
+    int i;
+    if (k <= 0) return -1;
+    p = L->next;
+    q = L->next;
+    for (i = 0; i < k; ++i) {
+        if (p == NULL) return -1;
+        p = p->next;
+    }
+    while (p != NULL) {
+        p = p->next;
+        q = q->next;
+    }
+    return q ? q->data : -1;
+}`,
+    cases: [
+      { name: "倒数第 2", stdin: "5\n10 20 30 40 50\n2\n" },
+      { name: "倒数第 n", stdin: "5\n10 20 30 40 50\n5\n" },
+      { name: "k 超长", stdin: "5\n10 20 30 40 50\n6\n" },
+      { name: "空表", stdin: "0\n1\n" },
+    ],
+  },
 };
