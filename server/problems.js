@@ -2874,7 +2874,227 @@ int WPL(BiTree T) {
       { name: "空树", stdin: "#\n" },
     ],
   },
+
+  "综合 6.4-06": {
+    title: "判断有向图能否进行拓扑排序",
+    sig: "int IsDAG(ALGraph G)",
+    ret: "图中无环返回 1（可以拓扑排序），有环返回 0。",
+    vars: [
+      "G：有向图邻接表，顶点编号 1..n。",
+      "思路：DFS 时用三种状态标记，0 未访问、1 在当前递归栈上、2 已完成，遇到指向状态 1 的边就有环。也可以用入度法做拓扑排序，看能否排出全部顶点。",
+    ],
+    io: "第一行 n m，随后 m 行 u v 表示一条有向边 u→v；输出一行为 1 或 0。",
+    pre: AL_PRE,
+    post: `int main(void) {
+    ALGraph G = BuildALG(1);
+    printf("%d\\n", IsDAG(G));
+    return 0;
+}`,
+    std: `int state[MAXV + 1];
+int cyc = 0;
+
+void dfs(ALGraph G, int v) {
+    ArcNode *p;
+    state[v] = 1;
+    p = G.vertices[v].firstarc;
+    while (p != NULL) {
+        if (state[p->adjvex] == 1) cyc = 1;
+        else if (state[p->adjvex] == 0) dfs(G, p->adjvex);
+        if (cyc) return;
+        p = p->nextarc;
+    }
+    state[v] = 2;
+}
+
+int IsDAG(ALGraph G) {
+    int i;
+    cyc = 0;
+    for (i = 1; i <= G.vexnum; ++i) state[i] = 0;
+    for (i = 1; i <= G.vexnum; ++i) {
+        if (state[i] == 0) dfs(G, i);
+        if (cyc) return 0;
+    }
+    return 1;
+}`,
+    cases: [
+      { name: "无环", stdin: "4 4\n1 2\n1 3\n2 4\n3 4\n" },
+      { name: "三顶点环", stdin: "3 3\n1 2\n2 3\n3 1\n" },
+      { name: "自环", stdin: "2 2\n1 1\n1 2\n" },
+      { name: "无边的三顶点", stdin: "3 0\n" },
+    ],
+  },
+
+  "综合 7.3-07": {
+    title: "求指定结点在二叉排序树中的层次",
+    sig: "int Level(BSTree T, int x)",
+    ret: "返回值为 x 的结点所在层次（根为第 1 层）；不存在返回 0。",
+    vars: [
+      "BSTree：二叉排序树，结点含 key。",
+      "按 key 大小比较往下走，走一步层次加一，不必遍历整棵树。",
+    ],
+    io: "第一行 n，第二行 n 个整数（插入顺序），第三行 x；输出一行为层次或 0。",
+    pre: BST_PRE,
+    post: `int main(void) {
+    int n = 0, x = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildBST(n);
+    if (scanf("%d", &x) != 1) return 0;
+    printf("%d\\n", Level(T, x));
+    return 0;
+}`,
+    std: `int Level(BSTree T, int x) {
+    int lv = 1;
+    while (T != NULL) {
+        if (T->key == x) return lv;
+        if (x < T->key) T = T->lchild;
+        else T = T->rchild;
+        lv = lv + 1;
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "样例", stdin: "6\n50 38 70 30 45 80\n30\n" },
+      { name: "根结点", stdin: "6\n50 38 70 30 45 80\n50\n" },
+      { name: "查不到", stdin: "6\n50 38 70 30 45 80\n99\n" },
+      { name: "单结点", stdin: "1\n9\n9\n" },
+    ],
+  },
+
+  "综合 7.3-10": {
+    title: "从大到小输出不小于 k 的关键字",
+    sig: "void PrintGE(BSTree T, int k)",
+    ret: "无返回值。按从大到小的顺序输出所有 key 不小于 k 的结点，每个值后跟一个空格。",
+    vars: [
+      "BSTree：二叉排序树，结点含 key。",
+      "用右子树、根、左子树的遍历次序，天然得到降序。",
+    ],
+    io: "第一行 n，第二行 n 个整数（插入顺序），第三行 k；输出一行为从大到小且不小于 k 的值。",
+    pre: BST_PRE,
+    post: `int main(void) {
+    int n = 0, k = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildBST(n);
+    if (scanf("%d", &k) != 1) return 0;
+    PrintGE(T, k);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void PrintGE(BSTree T, int k) {
+    if (T == NULL) return;
+    PrintGE(T->rchild, k);
+    if (T->key >= k) printf("%d ", T->key);
+    PrintGE(T->lchild, k);
+}`,
+    cases: [
+      { name: "样例", stdin: "6\n50 38 70 30 45 80\n45\n" },
+      { name: "k 很小", stdin: "6\n50 38 70 30 45 80\n0\n" },
+      { name: "k 很大", stdin: "6\n50 38 70 30 45 80\n100\n" },
+      { name: "单结点", stdin: "1\n9\n9\n" },
+    ],
+  },
+
+  "综合 7.2-05": {
+    title: "折半查找的递归算法",
+    sig: "int BinSearch(ElemType a[], int low, int high, ElemType k)",
+    ret: "找到返回元素下标，找不到返回 0。",
+    vars: [
+      "a：递增有序数组，下标从 1 到 n，a[0] 不用。",
+      "初始调用时 low 为 1、high 为 n，必须写成递归。",
+    ],
+    io: "第一行 n，第二行 n 个递增整数，第三行 k；输出一行为下标或 0。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, k = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    if (scanf("%d", &k) != 1) return 0;
+    printf("%d\\n", BinSearch(a, 1, n, k));
+    return 0;
+}`,
+    std: `int BinSearch(ElemType a[], int low, int high, ElemType k) {
+    int mid;
+    if (low > high) return 0;
+    mid = (low + high) / 2;
+    if (a[mid] == k) return mid;
+    if (a[mid] > k) return BinSearch(a, low, mid - 1, k);
+    return BinSearch(a, mid + 1, high, k);
+}`,
+    cases: [
+      { name: "找到中间", stdin: "8\n1 3 5 7 9 11 13 15\n7\n" },
+      { name: "找到端点", stdin: "8\n1 3 5 7 9 11 13 15\n15\n" },
+      { name: "找不到", stdin: "8\n1 3 5 7 9 11 13 15\n4\n" },
+      { name: "单元素", stdin: "1\n6\n6\n" },
+    ],
+  },
+
+  "综合 8.4-04": {
+    title: "在单链表上做简单选择排序",
+    sig: "void LinkSelectSort(LinkList L)",
+    ret: "无返回值。L 带头结点，按值升序；可以交换结点里的 data，也可以重排指针，结果一致。",
+    vars: [
+      "L：带头结点的单链表。",
+      "每趟从剩余部分选出最小者，与当前位置交换。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出两行：表长、升序序列。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    LinkSelectSort(L);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void LinkSelectSort(LinkList L) {
+    LNode *p = L->next, *q, *min;
+    ElemType t;
+    while (p != NULL) {
+        min = p;
+        q = p->next;
+        while (q != NULL) {
+            if (q->data < min->data) min = q;
+            q = q->next;
+        }
+        if (min != p) {
+            t = p->data;
+            p->data = min->data;
+            min->data = t;
+        }
+        p = p->next;
+    }
+}`,
+    cases: [
+      { name: "乱序", stdin: "6\n4 1 6 3 2 5\n" },
+      { name: "逆序", stdin: "4\n9 7 5 1\n" },
+      { name: "已有序", stdin: "4\n1 2 3 4\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
 };
+
 
 
 

@@ -1474,6 +1474,244 @@ body {
   color: #8a8272;
 }
 
+/* 第四层：分级改走排版。层级只由字号、字距、细分隔线和缩进表达，
+   去掉方块序号、胶囊标签和整行色块，红色只留给悬停与当前状态。 */
+.part-head {
+  display: grid !important;
+  grid-template-columns: minmax(34px, 58px) 1fr 26px;
+  align-items: baseline !important;
+  column-gap: 16px;
+  padding: 26px 0 14px !important;
+  border-bottom: 1px solid rgba(23, 20, 15, 0.16) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.part-head:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.part-head .no {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  color: #9a9284 !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.18em;
+  line-height: 1.5 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-align: left !important;
+}
+
+.part-head .ptitle h2 {
+  font-size: 25px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.012em;
+  line-height: 1.2;
+  color: #17140f;
+  margin: 0 0 4px !important;
+}
+
+.part-head.active h2 {
+  color: #17140f !important;
+}
+
+.part-head .pmeta {
+  font-size: 12px !important;
+  color: #948c7e !important;
+  letter-spacing: 0.02em;
+}
+
+.part-head .chev {
+  justify-self: end;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(23, 20, 15, 0.2) !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: #5c554a !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+}
+
+.part-head .chev.open {
+  border-color: #e63329 !important;
+  color: #e63329 !important;
+}
+
+.chapter-head {
+  padding: 22px 0 10px !important;
+  border-bottom: 0;
+  gap: 12px !important;
+}
+
+.chapter {
+  padding: 0 0 6px !important;
+  border-bottom: 1px solid rgba(23, 20, 15, 0.1);
+}
+
+.chapter:last-child {
+  border-bottom: 0;
+}
+
+.chapter-head h3 {
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.005em;
+  gap: 9px !important;
+  color: #17140f;
+  flex-wrap: wrap;
+}
+
+.chapter-head h3 .idx {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.14em;
+  color: #a39b8d !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.chapter-head h3 .tag {
+  font-size: 11.5px !important;
+  font-weight: 400 !important;
+  color: #9a9284 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+
+.chapter-head h3 .tag::before {
+  content: "·";
+  margin-right: 4px;
+  color: #c4bcae;
+}
+
+.chapter-head:hover h3 {
+  color: #e63329 !important;
+}
+
+.sec-list {
+  gap: 0 !important;
+}
+
+.sec-row {
+  padding: 11px 0 11px 6px !important;
+  border-radius: 0 !important;
+  border-left: 0 !important;
+  border-bottom: 1px solid rgba(23, 20, 15, 0.055) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  gap: 14px !important;
+  transition: padding-left 0.18s ease;
+}
+
+.sec-row:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding-left: 12px !important;
+}
+
+.sec-row .sno {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.08em;
+  color: #ada596 !important;
+  min-width: 30px !important;
+}
+
+.sec-row .stitle {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #24211c;
+}
+
+.sec-row:hover .stitle {
+  color: #e63329;
+}
+
+.sec-row .slead {
+  font-size: 12.5px !important;
+  color: #9a9284 !important;
+}
+
+.sec-row .arrow {
+  opacity: 0 !important;
+  font-size: 12px !important;
+  color: #8a8272;
+  transition: opacity 0.18s ease;
+}
+
+.sec-row:hover .arrow {
+  opacity: 1 !important;
+}
+
+.lesson-head h1 {
+  font-size: 30px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em;
+  line-height: 1.26;
+}
+
+.lesson-head .site-note {
+  font-size: 10.5px !important;
+  letter-spacing: 0.2em;
+  color: #a39b8d !important;
+}
+
+.topic {
+  display: block !important;
+  padding-top: 26px !important;
+  border-top: 1px solid rgba(23, 20, 15, 0.1);
+  margin-top: 20px;
+}
+
+.topic .num {
+  display: block !important;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace !important;
+  font-size: 10.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.16em;
+  color: #a39b8d !important;
+  text-align: left !important;
+  margin: 0 0 7px !important;
+}
+
+.topic h2 {
+  font-size: 21px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.008em;
+  margin: 0 0 12px !important;
+}
+
+.topic h2::before {
+  display: none !important;
+}
+
+.topic p.subhead {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #3d3730 !important;
+  margin: 24px 0 8px !important;
+  letter-spacing: 0;
+}
+
 @media (max-width: 760px) {
   .topbar {
     padding: 0 14px;
