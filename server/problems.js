@@ -51,6 +51,43 @@ const STR_PRE = `#include <stdio.h>
 #include <string.h>
 `;
 
+const ARR_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MAXN 1000
+typedef int ElemType;
+`;
+
+const BST_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct BSTNode {
+    int key;
+    struct BSTNode *lchild, *rchild;
+} BSTNode, *BSTree;
+
+BSTree BSTInsert(BSTree T, int k) {
+    if (T == NULL) {
+        T = (BSTNode *)malloc(sizeof(BSTNode));
+        T->key = k;
+        T->lchild = NULL;
+        T->rchild = NULL;
+        return T;
+    }
+    if (k < T->key) T->lchild = BSTInsert(T->lchild, k);
+    else if (k > T->key) T->rchild = BSTInsert(T->rchild, k);
+    return T;
+}
+
+BSTree BuildBST(int n) {
+    BSTree T = NULL;
+    int i, k;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &k) != 1) return T;
+        T = BSTInsert(T, k);
+    }
+    return T;
+}
+`;
+
 function printSqList(tailCount) {
   return `    printf("%d\\n", L.length);
     for (i = 0; i < L.length; ++i) printf("%d ", L.data[i]);
@@ -908,6 +945,371 @@ char Kth(BiTree T, int k) {
       { name: "单字符", stdin: "a\n" },
     ],
   },
+
+  "综合 8.3-02": {
+    title: "双向冒泡排序",
+    sig: "void BiBubble(ElemType a[], int n)",
+    ret: "无返回值。数组下标从 1 到 n，函数结束后 a[1..n] 必须升序。",
+    vars: [
+      "a：待排数组，a[0] 不用。",
+      "n：元素个数。",
+      "要求正反两向交替扫描：先一趟把最大值送到末尾，再一趟把最小值送到开头。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为升序后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    BiBubble(a, n);
+    for (i = 1; i <= n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void BiBubble(ElemType a[], int n) {
+    int low = 1, high = n, i, t, swapped;
+    while (low < high) {
+        swapped = 0;
+        for (i = low; i < high; ++i) {
+            if (a[i] > a[i + 1]) {
+                t = a[i];
+                a[i] = a[i + 1];
+                a[i + 1] = t;
+                swapped = 1;
+            }
+        }
+        high = high - 1;
+        for (i = high; i > low; --i) {
+            if (a[i - 1] > a[i]) {
+                t = a[i];
+                a[i] = a[i - 1];
+                a[i - 1] = t;
+                swapped = 1;
+            }
+        }
+        low = low + 1;
+        if (!swapped) break;
+    }
+}`,
+    cases: [
+      { name: "乱序", stdin: "8\n49 38 65 97 76 13 27 49\n" },
+      { name: "已有序", stdin: "5\n1 2 3 4 5\n" },
+      { name: "逆序", stdin: "4\n9 7 5 1\n" },
+      { name: "单元素", stdin: "1\n8\n" },
+    ],
+  },
+
+  "综合 8.3-03": {
+    title: "奇数移到偶数前面",
+    sig: "void OddEven(ElemType a[], int n)",
+    ret: "无返回值。只要求奇数都在偶数之前，不要求内部有序，但要求时间 O(n)、辅助空间 O(1)。",
+    vars: [
+      "a：数组下标从 1 到 n。",
+      "判断奇偶用 a[i] % 2，负数取模在老编译器下可能为负，测例只给正整数。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为处理后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    OddEven(a, n);
+    for (i = 1; i <= n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void OddEven(ElemType a[], int n) {
+    int low = 1, high = n, t;
+    while (low < high) {
+        while (low < high && a[low] % 2 == 1) low = low + 1;
+        while (low < high && a[high] % 2 == 0) high = high - 1;
+        if (low < high) {
+            t = a[low];
+            a[low] = a[high];
+            a[high] = t;
+            low = low + 1;
+            high = high - 1;
+        }
+    }
+}`,
+    cases: [
+      { name: "混合", stdin: "8\n1 2 3 4 5 6 7 8\n" },
+      { name: "全偶", stdin: "4\n2 4 6 8\n" },
+      { name: "全奇", stdin: "4\n1 3 5 7\n" },
+      { name: "偶在前", stdin: "6\n2 4 6 1 3 5\n" },
+    ],
+  },
+
+  "综合 8.3-06": {
+    title: "荷兰国旗问题",
+    sig: "void Flag(ElemType a[], int n)",
+    ret: "无返回值。0 表示红、1 表示白、2 表示蓝，函数结束后数组必须按 0、1、2 排好。",
+    vars: [
+      "a：数组下标从 1 到 n，元素只会是 0、1、2。",
+      "要求时间 O(n)、辅助空间 O(1)，一趟扫描完成。",
+    ],
+    io: "第一行 n，第二行 n 个取值 0/1/2 的整数；输出一行为排好的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    Flag(a, n);
+    for (i = 1; i <= n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void Flag(ElemType a[], int n) {
+    int i = 1, low = 1, high = n, t;
+    while (i <= high) {
+        if (a[i] == 0) {
+            t = a[low];
+            a[low] = a[i];
+            a[i] = t;
+            low = low + 1;
+            i = i + 1;
+        } else if (a[i] == 2) {
+            t = a[high];
+            a[high] = a[i];
+            a[i] = t;
+            high = high - 1;
+        } else {
+            i = i + 1;
+        }
+    }
+}`,
+    cases: [
+      { name: "混合", stdin: "9\n2 1 0 2 1 0 1 2 0\n" },
+      { name: "全白", stdin: "5\n1 1 1 1 1\n" },
+      { name: "全蓝", stdin: "3\n2 2 2\n" },
+      { name: "首尾颠倒", stdin: "4\n2 0 2 0\n" },
+    ],
+  },
+
+  "综合 8.3-05": {
+    title: "找出数组中第 k 小的元素",
+    sig: "int KthSmall(ElemType a[], int n, int k)",
+    ret: "返回第 k 小的元素值（k 从 1 开始）。",
+    vars: [
+      "a：数组下标从 1 到 n，元素互不相同。",
+      "要求平均时间 O(n)，用快速选择（划分后只递归一半）。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 k；输出一行为第 k 小的值。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, k = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    if (scanf("%d", &k) != 1) return 0;
+    printf("%d\\n", KthSmall(a, n, k));
+    return 0;
+}`,
+    std: `int Part(ElemType a[], int low, int high) {
+    ElemType p = a[low];
+    while (low < high) {
+        while (low < high && a[high] >= p) high = high - 1;
+        a[low] = a[high];
+        while (low < high && a[low] <= p) low = low + 1;
+        a[high] = a[low];
+    }
+    a[low] = p;
+    return low;
+}
+
+int KthSmall(ElemType a[], int n, int k) {
+    int low = 1, high = n, p;
+    while (low <= high) {
+        p = Part(a, low, high);
+        if (p == k) return a[p];
+        if (p < k) low = p + 1;
+        else high = p - 1;
+    }
+    return -1;
+}`,
+    cases: [
+      { name: "第 3 小", stdin: "8\n49 38 65 97 13 27 76 12\n3\n" },
+      { name: "第 1 小", stdin: "8\n49 38 65 97 13 27 76 12\n1\n" },
+      { name: "第 n 小", stdin: "8\n49 38 65 97 13 27 76 12\n8\n" },
+      { name: "单元素", stdin: "1\n5\n1\n" },
+    ],
+  },
+
+  "综合 8.4-05": {
+    title: "判断序列是否构成小根堆",
+    sig: "int IsMinHeap(ElemType a[], int n)",
+    ret: "是小根堆返回 1，否则返回 0；n 为 0 或 1 时返回 1。",
+    vars: [
+      "a：数组下标从 1 到 n，按完全二叉树的顺序存储。",
+      "小根堆条件：对每个 i（1 ≤ i ≤ n/2），a[i] 不大于它的左右孩子。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为 1 或 0。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 1; i <= n; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    printf("%d\\n", IsMinHeap(a, n));
+    return 0;
+}`,
+    std: `int IsMinHeap(ElemType a[], int n) {
+    int i;
+    for (i = 1; i <= n / 2; ++i) {
+        if (2 * i <= n && a[i] > a[2 * i]) return 0;
+        if (2 * i + 1 <= n && a[i] > a[2 * i + 1]) return 0;
+    }
+    return 1;
+}`,
+    cases: [
+      { name: "是小根堆", stdin: "8\n9 17 65 23 45 78 87 30\n" },
+      { name: "不是", stdin: "8\n9 23 17 45 65 78 87 30\n" },
+      { name: "单元素", stdin: "1\n7\n" },
+      { name: "两层违规", stdin: "4\n1 2 3 0\n" },
+    ],
+  },
+
+  "综合 8.6-02": {
+    title: "把前后两个有序段合并成一个有序表",
+    sig: "void MergeTwo(ElemType a[], int m, int n)",
+    ret: "无返回值。数组 a[1..m+n] 前 m 个元素有序、后 n 个元素有序，函数结束后整体升序。",
+    vars: [
+      "m：前半段长度；n：后半段长度。",
+      "原地处理，辅助空间 O(1)。从后往前取前段的元素、遇到比它小的就逐个右移一位，这种插入式做法最稳；注意不要用从两端向中间填的高位归并，那样会把后段还没输出的元素盖掉。",
+    ],
+    io: "第一行 m n，第二行 m+n 个整数；输出一行为合并后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    ElemType a[MAXN + 2];
+    int m = 0, n = 0, i, tot;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+    tot = m + n;
+    if (tot > MAXN) return 0;
+    for (i = 1; i <= tot; ++i) {
+        if (scanf("%d", &a[i]) != 1) return 0;
+    }
+    MergeTwo(a, m, n);
+    for (i = 1; i <= tot; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void MergeTwo(ElemType a[], int m, int n) {
+    int i, j, t;
+    for (i = m; i >= 1; --i) {
+        j = i;
+        while (j < m + n && a[j] > a[j + 1]) {
+            t = a[j];
+            a[j] = a[j + 1];
+            a[j + 1] = t;
+            j = j + 1;
+        }
+    }
+}`,
+    cases: [
+      { name: "交错", stdin: "4 4\n1 5 9 13 2 6 10 14\n" },
+      { name: "前半全大", stdin: "3 3\n7 8 9 1 2 3\n" },
+      { name: "后半全大", stdin: "3 3\n1 2 3 7 8 9\n" },
+      { name: "后半为空", stdin: "3 0\n1 2 3\n" },
+    ],
+  },
+
+  "综合 7.3-06": {
+    title: "判断二叉树是否是二叉排序树",
+    sig: "int IsBST(BSTree T)",
+    ret: "是二叉排序树返回 1，否则返回 0；空树返回 1。",
+    vars: [
+      "BSTree：二叉链表，结点含 key（int）、lchild、rchild。",
+      "判据是整棵树的中序序列严格递增，不要只比较父子两结点。",
+    ],
+    io: "第一行 n，第二行 n 个整数（按插入顺序）；输出一行为 1 或 0。",
+    pre: BST_PRE,
+    post: `int main(void) {
+    int n = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildBST(n);
+    printf("%d\\n", IsBST(T));
+    return 0;
+}`,
+    std: `int prev = 0;
+int has = 0;
+int bad = 0;
+
+void inorder(BSTree T) {
+    if (T == NULL || bad) return;
+    inorder(T->lchild);
+    if (has && T->key <= prev) bad = 1;
+    prev = T->key;
+    has = 1;
+    inorder(T->rchild);
+}
+
+int IsBST(BSTree T) {
+    prev = 0;
+    has = 0;
+    bad = 0;
+    inorder(T);
+    return bad ? 0 : 1;
+}`,
+    cases: [
+      { name: "标准 BST", stdin: "6\n50 38 70 30 45 80\n" },
+      { name: "单结点", stdin: "1\n9\n" },
+      { name: "同值忽略", stdin: "5\n10 5 15 5 20\n" },
+    ],
+  },
+
+  "综合 7.3-09": {
+    title: "求二叉排序树中最小和最大的关键字",
+    sig: "void MinMax(BSTree T, int *mn, int *mx)",
+    ret: "无返回值。把最小值写入 *mn，最大值写入 *mx；T 保证非空。",
+    vars: [
+      "BSTree：二叉链表，结点含 key。",
+      "最小值在最左端，最大值在最右端，不要用中序遍历全树。",
+    ],
+    io: "第一行 n，第二行 n 个整数（按插入顺序）；输出一行为两个整数：最小值 最大值。",
+    pre: BST_PRE,
+    post: `int main(void) {
+    int n = 0, mn = 0, mx = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildBST(n);
+    MinMax(T, &mn, &mx);
+    printf("%d %d\\n", mn, mx);
+    return 0;
+}`,
+    std: `void MinMax(BSTree T, int *mn, int *mx) {
+    BSTree p = T;
+    while (p->lchild) p = p->lchild;
+    *mn = p->key;
+    p = T;
+    while (p->rchild) p = p->rchild;
+    *mx = p->key;
+}`,
+    cases: [
+      { name: "样例", stdin: "6\n50 38 70 30 45 80\n" },
+      { name: "左偏", stdin: "5\n50 40 30 20 10\n" },
+      { name: "单结点", stdin: "1\n7\n" },
+    ],
+  },
 };
+
 
 
