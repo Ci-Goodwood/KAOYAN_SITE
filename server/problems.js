@@ -51,6 +51,82 @@ const STR_PRE = `#include <stdio.h>
 #include <string.h>
 `;
 
+const MG_PRE = `#include <stdio.h>
+#define MAXV 100
+#define INF 999999
+
+typedef struct {
+    int arcs[MAXV + 1][MAXV + 1];
+    int vexnum, arcnum;
+} MGraph;
+
+MGraph BuildMG(int directed) {
+    MGraph G;
+    int n = 0, m = 0, i, j, u, v, w;
+    G.vexnum = 0;
+    G.arcnum = 0;
+    if (scanf("%d %d", &n, &m) != 2) return G;
+    G.vexnum = n;
+    G.arcnum = m;
+    for (i = 1; i <= n; ++i) {
+        for (j = 1; j <= n; ++j) G.arcs[i][j] = (i == j) ? 0 : INF;
+    }
+    for (i = 0; i < m; ++i) {
+        if (scanf("%d %d %d", &u, &v, &w) != 3) break;
+        G.arcs[u][v] = w;
+        if (directed == 0) G.arcs[v][u] = w;
+    }
+    return G;
+}
+`;
+
+const AL_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MAXV 100
+
+typedef struct ArcNode {
+    int adjvex;
+    struct ArcNode *nextarc;
+} ArcNode;
+
+typedef struct VNode {
+    int data;
+    ArcNode *firstarc;
+} VNode, AdjList[MAXV + 1];
+
+typedef struct {
+    AdjList vertices;
+    int vexnum, arcnum;
+} ALGraph;
+
+void AddArc(ALGraph *G, int u, int v) {
+    ArcNode *p = (ArcNode *)malloc(sizeof(ArcNode));
+    p->adjvex = v;
+    p->nextarc = G->vertices[u].firstarc;
+    G->vertices[u].firstarc = p;
+}
+
+ALGraph BuildALG(int directed) {
+    ALGraph G;
+    int n = 0, m = 0, i, u, v;
+    G.vexnum = 0;
+    G.arcnum = 0;
+    if (scanf("%d %d", &n, &m) != 2) return G;
+    G.vexnum = n;
+    G.arcnum = m;
+    for (i = 1; i <= n; ++i) {
+        G.vertices[i].data = i;
+        G.vertices[i].firstarc = NULL;
+    }
+    for (i = 0; i < m; ++i) {
+        if (scanf("%d %d", &u, &v) != 2) break;
+        AddArc(&G, u, v);
+        if (directed == 0) AddArc(&G, v, u);
+    }
+    return G;
+}
+`;
+
 const ARR_PRE = `#include <stdio.h>
 #include <stdlib.h>
 #define MAXN 1000
@@ -1309,7 +1385,212 @@ int IsBST(BSTree T) {
       { name: "单结点", stdin: "1\n7\n" },
     ],
   },
+
+  "综合 6.2-04": {
+    title: "邻接表转邻接矩阵",
+    sig: "void ALtoM(ALGraph G, int M[][MAXV + 1])",
+    ret: "无返回值。把有向图的邻接表信息写进矩阵 M[1..n][1..n]，有边写 1，无边写 0。",
+    vars: [
+      "G：邻接表，G.vexnum 顶点数，G.vertices[i].firstarc 指向第 i 个顶点的边链表。",
+      "M：矩阵下标 0 行/列不用，行列都用 1..G.vexnum。",
+      "顶点编号从 1 开始。",
+    ],
+    io: "第一行 n m，随后 m 行每行 u v 表示一条有向边 u→v；输出 n 行，每行 n 个 0/1。",
+    pre: AL_PRE,
+    post: `int main(void) {
+    ALGraph G = BuildALG(1);
+    int M[MAXV + 1][MAXV + 1];
+    int i, j;
+    ALtoM(G, M);
+    for (i = 1; i <= G.vexnum; ++i) {
+        for (j = 1; j <= G.vexnum; ++j) printf("%d ", M[i][j]);
+        printf("\\n");
+    }
+    return 0;
+}`,
+    std: `void ALtoM(ALGraph G, int M[][MAXV + 1]) {
+    int i, j;
+    ArcNode *p;
+    for (i = 1; i <= G.vexnum; ++i) {
+        for (j = 1; j <= G.vexnum; ++j) M[i][j] = 0;
+    }
+    for (i = 1; i <= G.vexnum; ++i) {
+        p = G.vertices[i].firstarc;
+        while (p != NULL) {
+            M[i][p->adjvex] = 1;
+            p = p->nextarc;
+        }
+    }
+}`,
+    cases: [
+      { name: "四顶点", stdin: "4 5\n1 2\n1 3\n2 3\n3 4\n4 1\n" },
+      { name: "无孤立点", stdin: "3 3\n1 2\n2 3\n1 3\n" },
+      { name: "无孤立点二", stdin: "3 2\n1 2\n2 1\n" },
+    ],
+  },
+
+  "综合 6.3-03": {
+    title: "深度优先搜索的非递归算法",
+    sig: "void DFS(ALGraph G, int v0)",
+    ret: "无返回值。从 v0 出发按邻接表链的顺序输出访问序列，顶点之间用空格分隔，末尾也留一个空格。",
+    vars: [
+      "G：邻接表，遍历时按 firstarc 链的先后顺序取邻接点。",
+      "v0：起点编号（从 1 开始）。",
+      "要求非递归：自己开一个栈数组，不能用递归调用自己。",
+    ],
+    io: "第一行 n m，随后 m 行 u v 表示一条无向边；最后一行一个整数 v0；输出一行为访问序列。",
+    pre: AL_PRE,
+    post: `int main(void) {
+    ALGraph G = BuildALG(0);
+    int v0 = 0;
+    if (scanf("%d", &v0) != 1) return 0;
+    DFS(G, v0);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DFS(ALGraph G, int v0) {
+    int st[MAXV + 1];
+    int visited[MAXV + 1];
+    int top = 0, i, v;
+    ArcNode *p;
+    for (i = 1; i <= G.vexnum; ++i) visited[i] = 0;
+    printf("%d ", v0);
+    visited[v0] = 1;
+    st[top] = v0;
+    top = top + 1;
+    while (top > 0) {
+        v = st[top - 1];
+        p = G.vertices[v].firstarc;
+        while (p != NULL && visited[p->adjvex]) p = p->nextarc;
+        if (p != NULL) {
+            visited[p->adjvex] = 1;
+            printf("%d ", p->adjvex);
+            st[top] = p->adjvex;
+            top = top + 1;
+        } else {
+            top = top - 1;
+        }
+    }
+}`,
+    cases: [
+      { name: "五顶点", stdin: "5 5\n1 2\n1 3\n2 4\n3 4\n4 5\n1\n" },
+      { name: "链状", stdin: "4 3\n1 2\n2 3\n3 4\n2\n" },
+      { name: "单顶点", stdin: "1 0\n1\n" },
+    ],
+  },
+
+  "综合 6.3-02": {
+    title: "判断无向图是否为一棵树",
+    sig: "int IsTree(ALGraph G)",
+    ret: "是一棵树返回 1，否则返回 0。空图（0 个顶点）按树处理返回 1。",
+    vars: [
+      "G：无向图邻接表，顶点编号 1..n。",
+      "判据：边数等于 n-1 且连通（从任一顶点出发能到达全部顶点），两者缺一不可。边数对但存在环一定不连通。",
+    ],
+    io: "第一行 n m，随后 m 行 u v 表示一条无向边；输出一行为 1 或 0。",
+    pre: AL_PRE,
+    post: `int main(void) {
+    ALGraph G = BuildALG(0);
+    printf("%d\\n", IsTree(G));
+    return 0;
+}`,
+    std: `int IsTree(ALGraph G) {
+    int st[MAXV + 1];
+    int visited[MAXV + 1];
+    int top = 0, cnt = 0, i, v;
+    ArcNode *p;
+    if (G.vexnum == 0) return 1;
+    if (G.arcnum != G.vexnum - 1) return 0;
+    for (i = 1; i <= G.vexnum; ++i) visited[i] = 0;
+    visited[1] = 1;
+    cnt = 1;
+    st[top] = 1;
+    top = top + 1;
+    while (top > 0) {
+        v = st[top - 1];
+        top = top - 1;
+        p = G.vertices[v].firstarc;
+        while (p != NULL) {
+            if (!visited[p->adjvex]) {
+                visited[p->adjvex] = 1;
+                cnt = cnt + 1;
+                st[top] = p->adjvex;
+                top = top + 1;
+            }
+            p = p->nextarc;
+        }
+    }
+    return cnt == G.vexnum ? 1 : 0;
+}`,
+    cases: [
+      { name: "是树", stdin: "5 4\n1 2\n1 3\n3 4\n3 5\n" },
+      { name: "有环", stdin: "4 4\n1 2\n2 3\n3 4\n4 1\n" },
+      { name: "边够但不连通", stdin: "5 4\n1 2\n2 3\n1 3\n4 5\n" },
+      { name: "单顶点", stdin: "1 0\n" },
+    ],
+  },
+
+  "综合 6.4-03": {
+    title: "Dijkstra 求单源最短路径长度",
+    sig: "void ShortestPath(MGraph G, int v0, int dist[])",
+    ret: "无返回值。把 v0 到各顶点的最短距离写进 dist[1..n]，自己到自己是 0，不可达保持 INF。",
+    vars: [
+      "MGraph：邻接矩阵，G.arcs[i][j] 为权值，无边的位置是 INF，i==j 处为 0。",
+      "INF 在骨架里定义成 999999，判题输出时会把不小于 INF 的值显示成 -1。",
+      "顶点编号 1..n。",
+    ],
+    io: "第一行 n m，随后 m 行 u v w 表示有向边 u→v 权 w；最后一行为源点 v0；输出一行为 dist[1..n]。",
+    pre: MG_PRE,
+    post: `int main(void) {
+    MGraph G = BuildMG(1);
+    int dist[MAXV + 1];
+    int v0 = 0, i;
+    if (scanf("%d", &v0) != 1) return 0;
+    for (i = 1; i <= G.vexnum; ++i) dist[i] = INF;
+    ShortestPath(G, v0, dist);
+    for (i = 1; i <= G.vexnum; ++i) {
+        if (dist[i] >= INF) printf("-1 ");
+        else printf("%d ", dist[i]);
+    }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void ShortestPath(MGraph G, int v0, int dist[]) {
+    int S[MAXV + 1];
+    int i, j, k, minv, n = G.vexnum;
+    for (i = 1; i <= n; ++i) {
+        S[i] = 0;
+        dist[i] = G.arcs[v0][i];
+    }
+    S[v0] = 1;
+    dist[v0] = 0;
+    for (i = 1; i < n; ++i) {
+        minv = INF;
+        k = 0;
+        for (j = 1; j <= n; ++j) {
+            if (!S[j] && dist[j] < minv) {
+                minv = dist[j];
+                k = j;
+            }
+        }
+        if (k == 0) break;
+        S[k] = 1;
+        for (j = 1; j <= n; ++j) {
+            if (!S[j] && G.arcs[k][j] < INF && dist[k] + G.arcs[k][j] < dist[j]) {
+                dist[j] = dist[k] + G.arcs[k][j];
+            }
+        }
+    }
+}`,
+    cases: [
+      { name: "五顶点", stdin: "5 7\n1 2 10\n1 4 30\n1 5 100\n2 3 50\n3 5 10\n4 3 20\n4 5 60\n1\n" },
+      { name: "起点 2", stdin: "5 7\n1 2 10\n1 4 30\n1 5 100\n2 3 50\n3 5 10\n4 3 20\n4 5 60\n2\n" },
+      { name: "不可达", stdin: "3 1\n1 2 5\n1\n" },
+      { name: "单顶点", stdin: "1 0\n1\n" },
+    ],
+  },
 };
+
 
 
 
