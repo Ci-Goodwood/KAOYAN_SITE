@@ -2049,7 +2049,355 @@ int main(void) {
       { name: "一边为空", stdin: "0\n3\n1 2 3\n" },
     ],
   },
+
+  "综合 2.3-03": {
+    title: "从尾到头反向输出单链表",
+    sig: "void ReversePrint(LinkList L)",
+    ret: "无返回值。按从尾到头的顺序把每个结点的值输出，每个值后面跟一个空格。",
+    vars: [
+      "L：带头结点的单链表，数据从 L->next 开始。",
+      "可以用递归借助系统栈，也可以自己开数组或栈。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出一行为逆序的各个值。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v;
+    LinkList L;
+    LNode *tail, *t;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    ReversePrint(L);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void rp(LNode *p) {
+    if (p == NULL) return;
+    rp(p->next);
+    printf("%d ", p->data);
+}
+
+void ReversePrint(LinkList L) {
+    rp(L->next);
+}`,
+    cases: [
+      { name: "样例", stdin: "4\n1 2 3 4\n" },
+      { name: "单结点", stdin: "1\n9\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
+
+  "综合 2.3-04": {
+    title: "删除单链表中最小值结点",
+    sig: "void DelMinNode(LinkList L)",
+    ret: "无返回值。删除值最小的那个结点（假设唯一）并释放空间，L 带头结点。",
+    vars: [
+      "L：带头结点的单链表。",
+      "要记住最小值结点的前驱，删除时才能改指针。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出两行：新表长、剩余元素。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    DelMinNode(L);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DelMinNode(LinkList L) {
+    LNode *pre = L, *p = L->next, *minpre = L, *minp = L->next;
+    if (p == NULL) return;
+    while (p != NULL) {
+        if (p->data < minp->data) {
+            minp = p;
+            minpre = pre;
+        }
+        pre = p;
+        p = p->next;
+    }
+    minpre->next = minp->next;
+    free(minp);
+}`,
+    cases: [
+      { name: "中间最小", stdin: "5\n7 3 9 2 8\n" },
+      { name: "头部最小", stdin: "4\n1 5 6 7\n" },
+      { name: "尾部最小", stdin: "4\n9 8 7 0\n" },
+      { name: "单结点", stdin: "1\n5\n" },
+    ],
+  },
+
+  "综合 2.3-06": {
+    title: "把单链表就地排成递增有序",
+    sig: "void SortList(LinkList L)",
+    ret: "无返回值。L 带头结点，元素无序，处理后按值递增。要求就地做，不新建数据结点。",
+    vars: [
+      "L：带头结点的单链表。",
+      "直接插入排序的思路：把原表结点逐个摘下，插入到已排好序的部分。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出两行：表长、升序序列。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    SortList(L);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void SortList(LinkList L) {
+    LNode *p = L->next, *q, *pre;
+    L->next = NULL;
+    while (p != NULL) {
+        q = p->next;
+        pre = L;
+        while (pre->next != NULL && pre->next->data < p->data) pre = pre->next;
+        p->next = pre->next;
+        pre->next = p;
+        p = q;
+    }
+}`,
+    cases: [
+      { name: "乱序", stdin: "6\n4 1 6 3 2 5\n" },
+      { name: "已有序", stdin: "4\n1 2 3 4\n" },
+      { name: "逆序", stdin: "4\n4 3 2 1\n" },
+      { name: "含重复", stdin: "5\n3 1 3 2 1\n" },
+    ],
+  },
+
+  "综合 2.3-07": {
+    title: "删除单链表中介于两值之间的结点",
+    sig: "void DelBetween(LinkList L, ElemType lo, ElemType hi)",
+    ret: "无返回值。元素无序，删除所有满足 lo 小于 data 小于 hi 的结点并释放空间。",
+    vars: [
+      "L：带头结点的单链表，元素无序。",
+      "lo、hi：开区间端点，等于端点的不删。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 lo hi；输出两行：新表长、剩余元素。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, cnt = 0;
+    int lo = 0, hi = 0;
+    LinkList L;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d %d", &lo, &hi) != 2) return 0;
+    DelBetween(L, lo, hi);
+    p = L->next;
+    while (p) { cnt = cnt + 1; p = p->next; }
+    printf("%d\\n", cnt);
+    p = L->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void DelBetween(LinkList L, ElemType lo, ElemType hi) {
+    LNode *pre = L, *p = L->next, *q;
+    while (p != NULL) {
+        if (p->data > lo && p->data < hi) {
+            q = p;
+            pre->next = p->next;
+            p = p->next;
+            free(q);
+        } else {
+            pre = p;
+            p = p->next;
+        }
+    }
+}`,
+    cases: [
+      { name: "删中间值", stdin: "6\n5 2 9 1 7 3\n2 5\n" },
+      { name: "端点不删", stdin: "5\n1 2 3 4 5\n1 5\n" },
+      { name: "全删", stdin: "3\n3 4 5\n2 6\n" },
+      { name: "无命中", stdin: "3\n1 8 9\n2 5\n" },
+    ],
+  },
+
+  "综合 2.3-10": {
+    title: "把单链表按序号奇偶拆成两个表",
+    sig: "void Split(LinkList L, LinkList A, LinkList B)",
+    ret: "无返回值。A 收原表序号为奇数的结点，B 收序号为偶数的结点，两表都保持原相对次序，都带头结点。",
+    vars: [
+      "L：源表，带头结点；A、B 调用前已建好头结点、next 为空。",
+      "序号从 1 开始，第 1 个结点进 A。",
+    ],
+    io: "第一行 n，第二行 n 个整数；先输出 A 的表长和元素，再输出 B 的表长和元素，共四行。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, ca = 0, cb = 0;
+    LinkList L, A, B;
+    LNode *tail, *t, *p;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    A = (LinkList)malloc(sizeof(LNode));
+    A->data = 0;
+    A->next = NULL;
+    B = (LinkList)malloc(sizeof(LNode));
+    B->data = 0;
+    B->next = NULL;
+    Split(L, A, B);
+    p = A->next;
+    while (p) { ca = ca + 1; p = p->next; }
+    p = B->next;
+    while (p) { cb = cb + 1; p = p->next; }
+    printf("%d\\n", ca);
+    p = A->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n%d\\n", cb);
+    p = B->next;
+    while (p) { printf("%d ", p->data); p = p->next; }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void Split(LinkList L, LinkList A, LinkList B) {
+    LNode *p = L->next, *q, *ta = A, *tb = B;
+    int k = 1;
+    while (p != NULL) {
+        q = p->next;
+        p->next = NULL;
+        if (k % 2 == 1) {
+            ta->next = p;
+            ta = p;
+        } else {
+            tb->next = p;
+            tb = p;
+        }
+        k = k + 1;
+        p = q;
+    }
+}`,
+    cases: [
+      { name: "六结点", stdin: "6\n1 2 3 4 5 6\n" },
+      { name: "奇数个", stdin: "5\n10 20 30 40 50\n" },
+      { name: "单结点", stdin: "1\n8\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
+
+  "综合 2.3-21": {
+    title: "判断单链表是否有环",
+    sig: "int HasCycle(LinkList L)",
+    ret: "有环返回 1，无环返回 0。L 带头结点。",
+    vars: [
+      "L：带头结点的单链表，尾结点的 next 可能指向表中某个结点形成环。",
+      "用快慢指针，空间 O(1)。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 pos（0 表示无环，k 表示尾接到第 k 个结点）；输出一行为 1 或 0。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    int n = 0, i, v, pos = 0, k;
+    LinkList L;
+    LNode *tail, *t, *p, *target = NULL;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d", &pos) != 1) return 0;
+    if (pos > 0) {
+        p = L->next;
+        for (k = 1; p != NULL && k < pos; ++k) p = p->next;
+        target = p;
+        if (target != NULL) tail->next = target;
+    }
+    printf("%d\\n", HasCycle(L));
+    return 0;
+}`,
+    std: `int HasCycle(LinkList L) {
+    LNode *slow = L->next, *fast = L->next;
+    while (fast != NULL && fast->next != NULL) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return 1;
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "尾接第二个", stdin: "5\n1 2 3 4 5\n2\n" },
+      { name: "无环", stdin: "5\n1 2 3 4 5\n0\n" },
+      { name: "自环", stdin: "1\n9\n1\n" },
+      { name: "空表", stdin: "0\n0\n" },
+    ],
+  },
 };
+
 
 
 
