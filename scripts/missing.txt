@@ -1,0 +1,1187 @@
+
+===== 综合 2.2-09 [mode=code] =====
+线性表(句,a2,向,…，％)中的元素递增有序且按顺序存储于计算机内。要求设计一个算法，完成用最少时间在表中查找数值为x的元素，若找到，则将其与后继元素位置相交换，若找不到，则将其插入表中并使表中元素仍递增有序。
+--- starter ---
+void SearchExchangelnsert(ElemType A[],ElemType x)(
+    int low=0, high=n-1,mid; //low和high指向顺序表下界和上界的下标
+    while(low<=high){
+        mid= (low+high) /2; //找中间位置
+        if (A[mid] ==x) break; //找到 x,退出 while 循环
+
+    else high=mid-1; //到中点mid的左半部去查
+} //下面两个if语句只会执行一个
+if (A[mid] ==x&&mid! =n-1) { //若最后一个元素与x相等,则不存在与其后
+
+        t=A[mid]; A[mid]=A[mid+1]; A[mid+1]=t;
+    }
+    if (low>high) { //查找失败,插入数据元素x
+        for (i=n-1;i>high;i --) A[i+l]=A[i]; //后移元素
+        A[i+l]=x; .//插入 x
+    } //结束插入
+}
+
+
+===== 综合 2.2-14 [mode=code] =====
+【2020 统考真题】定义三元组(a,缶c) (a, b, c均为整数)的距离D = \a-b\ + \b-c\ +|c-a|。给定3个非空整数集合Si、S2和S3,按升序分别存储在3个数组中。请设计--个尽可能高效的算法，计算并输出所有可能的三元组(a, b, c) (ae5], beS2, cgS3)中的最小距离•例如 Si = {-1,0,9}, S2= (-25,-10, 10, 11), S3 = {2,9, 17, 30,41},则最小距离为2,相应的三元组为(9, 10,9)。要求：
+
+1 )给出算法的基本设计思想.2\) 根据设计思想，采用C语言或C++语言描述算法，关键之处给出注释。
+
+3\) 说明你所设计算法的时间复杂度和空间复杂度。
+--- starter ---
+L2 = \b- c\
+
+D = \a - b\ + \b - c\ + \c - a\ = L\ +£2 + ^3 = 2Z3
+
+int abs_(int a) {//计算绝对值
+    if (a<0) return -a;
+    else return a;
+}
+
+    if(a<=b&&a<=c) return true;
+    return false;
+}
+int f indMinofTrip (int A[ ].z int n, int B [ ], int m, int C [ ] z int p) {
+    //D_min用于记录三元组的最小距离,初值赋为INT_MAX
+    int i=0,j=0,k=0,D_min=INT_MAX,D;
+    while (i<n&&j<m&&k<p&&D__min>0) {
+        D=abs_(A[i]-B[j] )+abs_(B[j]-C[k] )+abs_(C[k]-A[i]); 〃计算 D
+        if (D<D_min) D__min=D; //更新 D
+        if (xls_min (A[i] rB[j],C[k])) i++; //更新 a
+        else if(xls_min(B[j]zC[k]zA[i])) j++;
+        else k++;
+    }
+    return D_min;
+
+
+===== 综合 2.3-01 [mode=code] =====
+设计一个递归算法，删除不带头结点的单链表L中所有值为x的结点。
+--- starter ---
+f (L, x) =f (L->next, x); 其他情况
+
+void Del_X_3(Linklist &L,ElemType x)(
+    LNode *p; //p指向待删除结点
+    if(L==NULL) 〃递归出口
+        return;
+    if(L->data==x){ //若L所指结点的值为x
+        p=L; //删除*L,并让L指向下一结点
+        L=L->next;
+        free(p);
+        Del_X_3(Lrx); //递归调用
+
+    else 〃若L所指结点的值不为x
+} 一 Del__X_3 (L->nextr x) ; //递归调用
+
+
+===== 综合 2.3-08 [mode=code] =====
+给定两个单链表，编写算法找出两个链表的公共结点。
+--- starter ---
+int dist;
+int lenl=Length (LI), len2=Length (L2); 〃计算两个链表的表长
+LinkList longList, shortList; //分别指向表长较长和较短的链表
+if (lenl>len2) { .//L1 表长较长
+    longList=Ll->next; shortList=L2->next;
+    dist=lenl-len2; //表长之差
+}
+else{ 〃L2表长较长
+    longList=sL2->next; shortList=Ll->next;
+    dist=len2-lenl; //表长之差
+}
+while(dist--) //表长的链表先遍历到第dist个结
+
+    longLists=longList->next;
+while(longList!-NULL){ //同步寻找共同结点
+    if (longList=s=shortList) 〃找到第一个公共结点
+        return longList;
+    else( //继续同步寻找
+        longList=longList->next;
+        shortList=shortList->next;
+
+    }//while
+    return NULL;
+}
+
+
+===== 综合 2.3-11 [mode=code] =====
+设C= {ax, bi, a2, b2,-",a„, bn}^}线性表，采用带头结点的单链表存放，设计一个就地算法，将其拆分为两个线性表，使得A = (ab a2,"-,an}, B= , b2, b}}.
+--- starter ---
+LinkList DisCreat_2(LinkList &A) {
+
+B->next=NULL; //B表的初始化
+LNode *p-A->next,*q; //p为工作指针
+LNode *ra-A; //ra始终指向A的尾结点
+while(p!=NULL)(
+    ra->next=p; ra=p; //将*?链到A的表尾
+    p=p->next;
+    if(p!=NULL){
+        q=p->next; //头插后,*?将断链,因此用q记忆*p的后继
+        p->nextssB->next; 〃将*p插入到B的前端
+        B->next=p;
+        p=q;
+    }
+}
+ra->next=NULL; //A尾结点的next域置空
+return B;
+
+
+===== 综合 2.3-22 [mode=code] =====
+【2009统考真题】已知一个带有表头结点的单链表，结点结构为
+
+data link
+
+假设该链表只给出了头指针list.在不改变链表的前提下，请设计一个尽可能高效的算法，查找链表中倒数第A:个位置上的结点以为正整数）。若查找成功，算法输出该结点的data域的值，并返回1;否则，只返回0。要求：
+
+1 ）描述算法的基本设计思想。
+
+2） 描述算法的详细实现步骤。
+
+3） 根据设计思想和实现步骤，采用程序设计语言描述算法（使用C、C++或Java语言实现），关键之处请给出简要注释•
+--- starter ---
+    typedef int ElemType; //链表数据的类型定义
+    typedef struct LNode( //链表结点的结构定义
+        ElemType data; //结点数据
+        struct LNode *link; //结点链接指针
+    }LNode, *LinkList;
+int Search_k(LinkList list, int k) {
+    LNode *p=list->linkz *q=list->link; 〃指针p、q指示第一个结点
+    int count=0;
+    while(p!=NULL){ //遍历链表直到最后一个结点
+        if (count<k) count++; 〃计数,若count<k只移动p
+        else q=q->link;
+        p=p->link; //之后让p、q同步移动
+
+    if(count<k)
+        return 0; 〃查找失败返回0
+    else ( //否则打印并返回1
+    printf(M%dH,q~>data);
+    return 1;
+    }
+} //Search__k
+
+
+===== 综合 2.3-23 [mode=code] =====
+【2012 统考真题】假定采用带头结点的单链表保存单词，当两个单词有相同的后缀时，可共享相同的后缀存储空间，例如，loading和being的存储映像如下图所示。
+
+M
+
+str2. I/ l-H nl-H g lAl Kp
+
+w
+
+设strl和str2分别指向两个单词所在单链表的头结点，链表结点结构为[data | next请设计一个时间上尽可能高效的算法，找出由strl和str2所指向两个链表共同后缀的起始位置（如图中字符i所在结点的位置P）。要求：
+
+1 ）给出算法的基本设计思想。
+
+2 ）根据设计思想，采用C或C++或Java语言描述算法，关键之处给出注释。
+
+3）说明你所设计算法的时间复杂度。
+--- starter ---
+typedef struct Node(
+    char data;
+    struct Node *next;
+JSNode;
+
+int listlen(SNode *head)(
+    int len=0;
+    while(head~>next!^NULL)(
+        len++;
+        head=head->next;
+    }
+    return len;
+}
+
+SNode* find_addr(SNode *strl,SNode *str2){
+    int m,n;
+    SNode *p,*q;
+    m=listlen(strl); //求strl的长度
+    n=listlen(str2); //求str2的长度
+    for(p=strl;m>n;m-- —) //若m>n,使p指向链表中的第m-n+1个结点
+            p=p->next;
+    for(q=str2;m<n;n--) //若m<n,使q指向链表中的第n-m+l个结点
+        q=q->next;
+
+p=p->next;
+q=q->next;
+
+return p->next; //返回共同后缀的起始地址
+
+
+===== 综合 2.3-20 [mode=code] =====
+设头指针为L的带有表头结点的非循环双向链表，其每个结点中除有pre （前驱指针）、data （数据）和next （后继指针）域外，还有一个访问频度域freq。在链表被启用前，其值均初始化为零。每当在链表中进行一次Locate （L, x）运算时，令元素值为x的结点中freq域的值增1,并使此链表中结点保持按访问频度非增（递减）的顺序排列，同时最近访问的结点排在频度相同的结点前面，以便使频繁访问的结点总是靠近表头。试编写符合上述要求的Locate （L,x）运算的算法，该运算为函数过程，返回找到结点的地址，类型为指针型。
+--- starter ---
+DLinkList Locate(DLinkList &L,ElemType x){
+    DNode *p=L->nextr *q; //p为工作指针,q为p的前驱,用于查找插入位置
+    while(p&&p->data * =x)
+        p=p->next; //查找值为x的结点
+    if(!p)
+        exit (0) ; //不存在值为x的结点
+    else{
+        p->freq++; //令元素值为x的结点的freq域加1
+        if(p->pre==L||p->pre->freq>p->freq)
+            return p; 〃p是链表首结点,或freq值小于前驱
+        if(p->next!=NULL) p->next->pre=p->pre;
+
+q=p->pre; //以下查找p结点的插入位置
+while(q!=L&&q->freq<=p->freq)
+        q=q->pre;
+.p->next=q->next;
+
+        p->pre=sq;
+        q->next=p;
+    }
+    return p; //返回值为x的结点的指针
+}
+
+
+===== 综合 2.3-17 [mode=code] =====
+设计一个算法用于判断带头结点的循环双链表是否对称。
+--- starter ---
+int Symmetry(DLinkList L) {
+    DNode *p=L->nextz *q=L->prior; //两头工作指针
+    while(p!=q&&q->next!=p) //循环跳出条件
+        if(p->data==q->data){ //所指结点值相同则继续比较
+            p=p->next;
+            q=q->prior;
+            }
+        else //否则,返回0
+            return 0;
+    return 1; //比较结束后返回1
+
+
+===== 综合 2.3-18 [mode=code] =====
+有两个循环单链表，链表头指针分别为hl和h2,编写一个函数将链表h2链接到链表hl之后，要求链接后的链表仍保持循环链表形式。
+--- starter ---
+LinkList Link(LinkList &hlz LinkList &h2){
+//将循环链表h2链接到循环链表hl之后,使之仍保持循环链表的形式
+    LNode *p,*q; //分别指向两个链表的尾结点
+    p=hl;
+    while(p->next!=hl) 〃寻找hl的尾结点
+        p=p->next;
+    q=h2;
+    while(q->next!=h2) //寻找h2的尾结点
+        q=q->next;
+
+q->next=hl; 〃令h2的尾结点指向hl
+return hl;
+
+
+===== 综合 3.3-02 [mode=code] =====
+按下图所示铁道进行车厢调度(注意，两侧铁道均为单向行驶道，火车调度站有一个用于调度的“栈道”)，火车调度站的入口处有〃节硬座和软座车厢(分别用H和S表示)
+
+等待调度，试编写算法，输出对这"节车厢进行调度的操作(即入栈或出栈操作)序列，以使所有的软座车厢都被调整到硬座车厢之前。
+--- starter ---
+void Train_Arrange(char *train)(
+//用字符串train表示火车,H表示硬座,S表示软座
+    char *p=trainz *q-train, c;
+    stack s;
+    InitStack(s); //初始化栈结构
+    while(*p){
+        if(★?==*')
+            Push(s,*p); //把H存入栈中
+        else
+            *(q++)=*p; //把S调到前部
+        P++;
+    }
+    while(!StackEmpty(s)){
+        Pop(s,c);
+        *(q++)=c; 〃把H接在后部
+
+
+===== 综合 3.1-05 [mode=code] =====
+设有两个栈si、s2都采用顺序栈方式，并共享一个存储区[0,...,maxsize-1],为了尽量利用空间，减少溢出的可能，可采用栈顶相向、迎面增长的存储方式。试设计si、s2有关入栈和出栈的操作算法。
+--- starter ---
+#define maxsize 100 //两个栈共享顺序存储空间所能达到的最多元素数,
+                                //初始化为100
+#define elemtp int //假设元素类型为整型
+typedef struct(
+    elemtp stack[maxsize]; //栈空间
+    int top[2]; //top为两个栈顶指针
+}stk;
+stk s; //S是如上定义的结构类型变量,为全局变量
+
+int push(int i, elemtp x){
+//入栈操作。i为栈号,i=0表示左边的si栈,i=l表示右边的s2栈,x是入栈元素
+//入栈成功返回1,否则返回0
+    if(i<0||i>1){
+
+    exit (0);
+}.if(s.top[1]-s.top[0]=Hl){
+
+    return 0;
+}
+switch(i){
+    case 0: s.stack[++s.top[0]]=x; return 1; break;
+    case 1: s.stack[--s.top[1]]=x; return 1;
+
+elemtp pop(int i){
+//退栈算法。i代表栈号,i=0时为si栈,时为s2栈
+//退栈成功返回退栈元素,否则返回-1
+    if(i<0||i>l){
+
+    exit(0);
+}
+switch(i){
+    case 0:
+        if(s ・ top[0]==-l)(
+        }", """ printf ("栈空\n");
+            return -1;
+        else
+            return s.stack[s.top[0]--];
+        break;
+    case 1:
+        if(s.top[1]==maxs i ze){
+
+return -1;
+
+        else
+            return s.stack[s.top[1]++];
+        break;
+}//switch
+
+
+===== 综合 3.1-04 [mode=code] =====
+设单链表的表头指针为L,结点结构由data和next两个域构成，其中data域为字符型。
+
+试设计算法判断该链表的全部n个字符是否中心对称。例如xyx、xyyx都是中心对称。
+--- starter ---
+int de(LinkList Lr int n){
+    int i;
+    char s[n/2]; //s字符栈
+    LNode *p=L->next; //工作指针P,指向待处理的当前元素
+    for(i=0;i<n/2;i++){ //链表前一半元素进栈
+        s[i]=p->data;
+        pa=p->next;
+    }
+                                //恢复最后的i值
+    if(n%2-=l) //若n是奇数,后移过中心结点
+        p=p->next;
+
+        i-; //.i充当栈顶指针
+        p=p->next;
+    }
+    if(i==-1) 〃栈为空栈
+        return 1; //链表中心对称
+    else
+        return 0; //链表不中心对称
+}
+
+
+===== 综合 3.2-02 [mode=code] =====
+Q是一个队列，S是一个空栈，实现将队列中的元素逆置的算法。
+--- starter ---
+void Inverser(Stack &SZQueue &Q){
+//本算法实现将队列中的元素逆置
+    while(!QueueEmpty(Q)){
+        x=DeQueue (Q); //队列中全部元素依次出队
+        Push (S, x) ; //元素依次入栈
+    }
+    while(!StackEmpty(S) ){
+        Pop (S, x).; 〃栈中全部元素依次出栈
+        EnQueue (Q, x) ; //再入队
+    }
+}
+
+
+===== 综合 3.2-03 [mode=code] =====
+利用两个栈S1和S2来模拟一个队列，已知栈的4个运算定义如下：
+
+```text
+Push (S, x) ; //元素 x 入栈 S
+Pop(S,x); //S出栈并将出栈的值赋给x
+StackEmpty (S) ; //判断栈是否为空
+Stackoverflow(S) ; //判断栈是否满
+```
+
+如何利用栈的运算来实现该队列的3个运算（形参由读者根据要求自己设计）？
+
+```text
+Enqueue; //将元素x入队
+Dequeue; //出队,并将出队元素存储在x中
+QueueEmpty; //判断队列是否为空
+```
+--- starter ---
+int EnQueue(Stack &S1,Stack &S2,ElemType e){
+    if(!Stackoverflow(SI)){
+        Push(SI,e); *
+        return 1;
+
+if(StackOverflow(SI)&&!StackEmpty(S2)){
+
+    return 0;
+}
+if(StackOveflow(SI)&&StackEmpty(S2)){
+    while(!StackEmpty(SI))(
+        Pop(Sl,x);
+        Push(S2,x);
+
+    }
+    Push(S1,e);
+    return 1;
+}
+
+void DeQueue(Stack &S1,Stack &S2,ElemType &x){
+    if(!StackEmpty(S2)){
+        Pop(S2,x);
+
+else if(StackEmpty(SI)){
+
+        }
+        else( '
+            while(!StackEmpty(SI))(
+                Pop(Sl,x);
+                Push (S2, x);
+        Pop(S2,x);
+'}
+    }
+
+int QueueEmpty(Stack SI,Stack S2){
+    if(StackEmpty(SI)&&StackEmpty(S2))
+        return 1;
+    else
+        return 0;
+
+
+===== 综合 3.2-01 [mode=code] =====
+若希望循环队列中的元素都能得到利用，则需设置一个标志域tag,并以tag的值为0或1来区分队头指针front和队尾指针rear相同时的队列状态是“空”还是“满” j试编写与此结构相应的入队和出队算法。
+--- starter ---
+int EnQueuel(SqQueue &Qf ElemType x){
+    if(Q.front==Q.rear&&Q.tag==l)
+return 0; //两个条件都满足时则队满
+    Q.data[Q.rear]=x;
+    Q.rear=(Q.rear+1)%MaxSize;
+    Q. tag=1; //可能队满
+    return 1;
+}
+
+int DeQueue1(SqQueue &Q,ElemType &x){
+    if(Q.front==Q.rear&&Q.tag==0)
+        return 0; //两个条件都满足时则队空
+    x~Q.data[Q. front];
+    Q・ front=(Q・ front+l)%MaxSize;
+    Q. tag=0; //可能队空
+    return 1;
+}
+
+
+===== 综合 3.2-04 [mode=code] =====
+【2019 统考真题】请设计一个队列，要求满足：①初始时队列为空；②入队时，允许增加队列占用空间；③出队后，出队元素所占用的空间可重复使用，即整个队列所占用的空间只增不减；④入队操作和出队操作的时间复杂度始终保持为0（1）。请回答下列问题：
+
+1 ）该队列是应选择链式存储结构，还是应选择顺序存储结构？
+
+2） 画出队列的初始状态，并给出判断队空和队满的条件。
+
+3） 画出第一个元素入队后的队列状态。
+
+4） 给出入队操作和出队操作的基本过程。
+--- starter ---
+若(front==rear->next) 〃队满
+
+若(front==rear) 〃队空
+
+
+===== 综合 3.3-03 [mode=code] =====
+利用一个栈实现以下递归函数的非递归计算:
+
+```text
+        1, H = 0
+己(x) = < 2x, n = \
+```
+
+2x《Q)-2(”-1)R_2(x), n>\
+--- starter ---
+double p(int nz double x){
+    struct stack(
+        int no; //保存n
+        double val; //保存Pn(x)值
+    }st[MaxSize];
+    int top=-lz i; //top为栈st的下标值变量
+    double fvl=1,fv2=2*x; //n=0, n=l时的初值
+    for(i^n;i>=2;i—){
+        top++;
+        st[top].no=i;
+    } //入栈
+    while(top>~0){
+        st[top].val=2*x*fv2-2*(st[top].no-1)*fvl;
+        fvl=fv2;
+        fv2=st[top].val;
+        top— —; //出栈
+    }
+    if (n==0) {
+        return fvl;
+    return fv2;
+}
+
+
+===== 综合 3.3-04 [mode=code] =====
+某汽车轮渡口，过江渡船每灵能栽10辆车过江°过江车辆分为客车类和货车类，上渡船有如下规定：同类车先到先上船；客车先于货车上船，且每上4辆客车，才允许放上1辆货车；若等待客车不足4辆，则以货车代替；若无货车等待，允许客车都上船。试设计一个算法模拟渡口管理。
+--- starter ---
+Queue q; //过江渡船载渡队列
+Queue ql; //客车队列
+Queue q2; //货车队列
+void manager (){
+    int i=0zj=0; //j表示渡船上的总车辆数
+    while(j<10){ //不足10辆时
+        if(IQueueEmpty(ql)&&i<4){ //客车队列不空,则未上足4辆
+            DeQueue(ql,x); //从客车队列出队
+            EnQueue(q,x); //客车上渡船
+            i++; //客车数加1
+            j++; //渡船上的总车辆数加1
+        }
+        else if(i==4&&IQueueEmpty(q2)){ //客车已上足4辆
+            DeQueue(q2,x); //从货车队列出队
+            EnQueue(q,x); //货车上渡船
+            j++; //渡船上的总车辆数加1
+            i=0; //每上一辆货车,i重新计数
+        } J-'.''..'
+        else{ //其他情况(客车队列空或货车队列空)
+            while (j<10&&i<4&&! QueueEmpty (q2) ) { //客车队列空
+                DeQueue(q2,x); //从货车队列出队
+                EnQueue(q,x); //货车上渡船
+                i++; //i计数,当i>4时,退出本循环
+                j++; //渡船上的总车辆数加1
+
+    i=0;
+}
+if(QueueEmpty(ql)& &QueueEmpty(q2))
+    j=ll; 〃若货车和客车加起来不足10辆
+
+}
+
+
+===== 综合 5.1-03 [mode=code] =====
+已知一棵度为m的树中，有"1个度为1的结点；有n2个度为2的结点....有nm个度为m的结点，问该树有多少个叶结点？
+
+①推导公式 S = + mh l + mh~3 + • • • + + 1 = (mh — l)/(w 一 1)。
+--- starter ---
+n0 = («i + 2n2 + 3〃3 + ••• + + 1)-(〃】+ 〃2 + •., + 榆
+
+i=2
+
+
+===== 综合 5.3-16 [mode=code] =====
+设计一个算法将二叉树的叶结点按从左到右的顺序连成一个单链表，表头指针为head。
+
+二叉树按二叉链表方式存储，链接时用叶结点的右指针域来存放单链表指针。
+--- starter ---
+LinkedList head, pre=NULL; 〃全局变量
+
+    if(bt){
+        InOrder(bt->lchild); //中序遍历左子树
+        if(bt->lchild==NULL&&bt->rchild==NULL) //叶结点
+            if(pre==NULL){
+                head=bt;
+                pre=bt;
+            } //处理第一个叶结点
+            else(
+                pre->rchild=bt;
+                pre=bt;
+            } //将叶结点链入链表
+        InOrder(bt->rchild); 〃中序遍历右子树
+        pre->rchild=cNULL; //设置链表尾
+    return head;
+}
+
+
+===== 综合 5.3-20 [mode=code] =====
+【2017 统考真题】请设计一个算法，将给定的表达式树（二叉树）转换为等价的中缀表达式（通过括号反映操作符的计算次序）并输出。例如，当下列两棵表达式树作为算法的输入时：
+
+输出的等价中缀表达式分别为（a+b） * （c* （-d））和（a*b） + （- （c-d））.二叉树结点定义如下：
+
+```text
+typedef struct node(
+        char data[10]; //存储操作数或操作符
+        struct node *right;
+    }BTree; .
+```
+
+要求：
+
+1） 给出算法的基本设计思想。
+
+2） 根据设计思想，采用C或C++语言描述算法，关键之处给出注释。
+--- starter ---
+void BtreeToE(BTree *root){
+    BtreeToExp (rootz 1) ; //根的高度为 1
+}
+void BtreeToExp( BTree *root,int deep)
+{
+    if (root==NULL) return; //空结点返回
+    else if (root->left==NULL&&root->right==NULL) //若为叶结点
+        printf root->data) ; //输出操作数,不加括号
+    else(
+        if (deep>l) printf (" (”); //若有子表达式则加1层括号
+        BtreeToExp(root->left, deep+1); '
+        printf root->data);
+                                //输出操作符
+        BtreeToExp(root->rightr deep+1);
+        if (deep>l) printf (M) M); //若有子表达式则加1层括号
+    }
+
+
+===== 综合 5.3-03 [mode=code] =====
+编写后序遍历二叉树的非递归算法。
+--- starter ---
+void PostOrder(BiTree T)(
+    InitStack(S);
+    BiTNode *p~T;
+    BiTNode *r=NULL;
+    while(p||!IsEmpty(S)){
+        if(p){ //走到最左边
+                push(S,p);
+            p=p->lchild;
+        else{ //向右
+                GetTop(S,p); 〃读栈顶结点(非出栈)
+
+    p=p->rchild; //转向右
+else ( //否则,弹出结点并访问
+    pop(S,p); //将结点弹出
+    visit(p->data); //访问该结点
+    r=p; //记录最近访问过的结点
+    p=NULL; //结点访问完后,重置p指针
+
+}//while
+
+
+===== 综合 5.3-13 [mode=code] =====
+设一棵二叉树的结点结构为（LLINK,INFO,RLINK） , ROOT为指向该二叉树根结点的指针,p和q分别为指向该二叉树中任意两个结点的指针，试编写算法ANCESTOR （ROOT,P,q,r）,找到p和q的最近公共祖先结点r。
+--- starter ---
+typedef struct(
+    BiTree t;
+
+} stack;
+stack s [ ] r si [ ]; //栈,容量足够大
+
+//本算法求二叉树中p和q指向结点的最近公共结点
+top=0;bt=ROOT;
+while(btl^NULLI Itop>0){
+    while(bt!=NULL){
+        s[++top]・ t=bt;
+        s[top]. tag=0;
+        bt=bt->lchild;
+        } //沿左分支向下
+    while(top!-0&&s[top].tag==1){
+    //假定p在q的左侧,遇到p时,栈中元素均为p的祖先.
+        if(s[top].t==p){
+                for(i=1;i<=top;i++)
+                    si[i]-s[i];
+                    topl=top;
+        } //将栈S的元素转入辅助栈Si保存
+        if (s [top] .t==q) //找到 q 结点
+
+for(j=topl;j>0;j--)
+    if (sl[j] .t—s[i] .t)
+
+                    }
+                    top— —; //退栈
+        } //while 、
+        if(top!=0){
+            s[top].tag=l;
+            bt=s[topJ.t->rchild;
+        } //沿右分支向下遍历
+    } //while
+    return NULL; //p和q无公共祖先
+}
+
+
+===== 综合 5.3-06 [mode=code] =====
+设一棵二叉树中各结点的值互不相同，其先序遍历序列和中序遍历序列分别存于两个一维数组A[l...n]和B[l...n]中，试编写算法建立该二叉树的二叉链表。
+--- starter ---
+//ll,hl为先序的第一和最后一个结点下标,12,h2为中序的第一和最后一个结点下标
+//初始调用时,11=12=1, hl=h2=n
+root= (BiTNode*)malloc (sizeof (BiTNode) ) ; //建根结点
+root->data=A[ll]; //根结点
+for (i=12;B[i] ! =root->data; i++); //根结点在中序序列中的划分
+llen=i-12; 〃左子树长度
+rlen=h2-i; //右子树长度
+if (lien) //递归建立左子树
+    root->lchild=PreInCreat(A,B,11+1,11+llen,12,12+llen-l);
+else //左子树为空
+    root->lchild=NULL;
+if (rlen) 〃递归建立右子树
+    root->rchild=PreInCreat(A,B,hl-rlen+1,hl,h2-rlen+l,h2);
+else //右子树为空
+    root->rchild=NULL;
+return root; //返回根结点指针
+
+
+===== 综合 5.3-18 [mode=code] =====
+写出在中序线索二叉树里查找指定结点在后序的前驱结点的算法。
+--- starter ---
+//在中序线索二叉树t中,求指定结点p在后序下的前驱结点q
+    BiThrTree q;
+    if (p->rtag==O) //若p有右子女,则右子女是其后序前驱
+        q=p->rchild;
+    else if (p->ltag==O) //若p只有左子女,则左子女是其后序前驱
+        q=p->lchild;
+    else if(p->lchild==NULL)
+        q-NULL; 〃p是中序序列第一结点,无后序前驱
+    else( 〃顺左线索向上找p的祖先,若存在,再找祖先的左子女
+        while(p->ltag==1&&p->lchild!=NULL)
+            p=p->lchild;
+        if (p->ltag~O)
+            q«p->lchild; //p结点的祖先的左子女是其后序前驱
+        else
+            q=NULL; 〃仅有单支树(p是叶子),己到根结点,p无后序前驱
+}
+    return q;
+
+
+===== 综合 5.4-06 [mode=code] =====
+已知一棵树的层次序列及每个结点的度，编写算法构造此树的孩子-兄弟链表。
+--- starter ---
+#define maxNodes 15
+void createCSTree_Degree(CSTree&T,DataType e[],int degree{],int n){
+//根据树结点的层次序初e []和各结点的度degree []构造树的孩子-兄弟链表
+//参数n是树结点个数
+
+int i,jzd,k=0;
+for (i=0; i<n; i++) {//初始化
+    pointer[i]->data=e[i];
+    pointer[i]->lchild=pointer[i]->rsibling=NULL;
+}
+for(1=0;i<n;i++){
+    d=degree [i] ; //结点i的度数
+    if(d){
+        k+ + ; //k为子女结点序号
+
+        for (js=2; j<=d; j++) (
+                k++;
+            pointer[k-1]->rsibling=pointer[k];
+    } 、 }
+} '
+T=pointer[0];
+delete [] pointer;
+
+
+===== 综合 6.2-05 [mode=code] =====
+【2015 统考真题】已知含有 5 个顶点的无向图 G，边为 0–1、0–2、0–4、1–3、1–4、2–3、3–4。
+
+1. 写出图 G 的邻接矩阵 A（行、列下标从 0 开始）。
+2. 求 A²，矩阵 A² 中位于 0 行 3 列元素值的含义是什么？
+3. 若已知具有 n（n≥2）个顶点的图的邻接矩阵为 B，则 Bᵐ（2≤m≤n）中非零元素的含义是什么？
+--- starter ---
+A = 1 0 0 1 0
+
+a2 = 0 2 2 0 2
+
+
+===== 综合 6.2-06 [mode=code] =====
+【2021统考真题】已知无向连通图G由顶点集/和边集E组成，|£| > 0,当G中度为奇数的顶点个数为不大于2的偶数时，G存在包含所有边且长度为旧的路径（称为EL路径）。设图G采用邻接矩阵存储，类型定义如下：
+
+```text
+typedef struct( //图的定义
+    int numVertices,numEdges; //图中实际的顶点数和边数
+    char VerticesList[MAXV]; //顶点表。MAXV为已定义常量
+    int Edge[MAXV] [MAXV]: //邻接矩阵
+    }MGraph;
+```
+
+请设计算法 int IsExistEL （MGraph G）,判断G是否存在EL路径，若存在，则返回1,否则返回0。要求：
+
+1）给出算法的基本设计思想。
+
+2） 根据设计思想，采用C或C++语言描述算法，关键之处给出注释。
+
+3） 说明你所设计算法的时间复杂度和空间复杂度。
+--- starter ---
+int IsExistEL(MGraph G){
+    //采用邻接矩阵存储,判断图是否存在EL路径
+    int degree,i,j,count=0;
+    for(i=0;i<G.numvertices;i++)(
+        degree=0;
+        for (j=0; j<G.numVertices; j++)
+            degree+=G. Edge [i] [ j ]; //依次计算各个顶点的度
+        if(degree%2!=0)
+            count++; //对度为奇数的顶点计数
+    }
+    if (count==:0 | I count===2)
+        return 1; //存在EL路径,返回1
+    else
+        return 0; //不存在EL路径,返回0
+
+
+===== 综合 6.3-05 [mode=code] =====
+假设图用邻接表表示，设计一个算法，输出从顶点、到顶点匕的所有简单路径。
+--- starter ---
+void FindPath(AGraph u,int vr int path[],int d){
+    int w;
+    ArcNode *p;
+    d++; //路径长度增1
+    path[d]=u; //将当前顶点添加到路径中
+    visited[u]=1; 〃置己访问标记
+    if(u==v) //找到一条路径则输出
+
+p=G->adjlist[u]. firstarc; 〃p指向U的第一个相邻点
+while(p!-NULL){
+    w=p->adjvex; //若顶点W未访问,递归访问它
+    if(visited[w]==0)
+        FindPath(G,w,v,path,d);
+    p=p->nextarc; //p指向u的下一个相邻点
+}
+visitedfu]=0; //恢复环境,使该顶点可重新使用
+
+
+===== 综合 6.3-04 [mode=code] =====
+分别采用基于深度优先遍历和广度优先遍历算法判别以邻接表方式存储的有向图中是否存在由顶点v,到顶点匕的路径（//；）.注意，算法中涉及的图的基本操作必须在此存储结构上实现。
+--- starter ---
+int visited[MAXSIZE] = {0}; //访问标记数组
+void DFS(ALGraph G,int i, int j,bool &can_reach){
+//深度优先判断有向图G中顶点vi到顶点vj是否有露径,用can^reach来标识
+    if(i==j){
+        can_reach^true;
+        return; //i 就是 j
+
+visited[i] =1; //置访问标记
+for(int p=FirstNeighbor(G,i);p>=0;p=NextNeighbor(G,i,p))
+    if (! visited[p] && !can__reach) //递归检测邻接点
+        DFS(G,p,j,can_reach);
+
+int visited [MAXSIZE] = {0}; //访问标记数组
+int BFS(ALGraph G,int i,int j){
+//广度优先判断有向图G中顶点vi到顶点vj是否有路径,是则返回1,否则返回0
+
+    while (! isEmpty (Q)) ( //非空循环
+        DeQueue (Qr u) ; //队头顶点出队
+        visitedfu] =1; //置访问标记
+        if(u==j) return 1;
+        for(int p=FirstNeighbor(G,u);p;p=NextNeighbor(G,u,p)){
+                                //检查所有邻接点
+            if (p—j ) 〃若p==j,则查找成功
+                return 1;
+            if (!visited[p] ) { //否则,顶点 p 入队
+                EnQueue(Q,p);
+                visited[p]=1;
+        }//for
+    }//while
+return 0;
+
+
+===== 综合 6.4-10 [mode=code] =====
+【2014 统考真题】某网络中的路由器运行OSPF路由协议，下表是路由器R1维护的主要链路状态信息（LSI）, R1构造的网络拓扑图（见下图）是根据题下表及R1的接口名构造出来的网络拓扑。
+
+R1 的 LSI R2 的 LSI R3 的 LSI R4 的 LSI 备注Router ID 10.1.1.1 10.1.1.2 10.1.1.5 10.1.1.6 标识路由器的IP地址ID 10.1.1.2 10.1.1.1 10.1.1.6 10.1.1.5 所连路由器的Router ID Linkl IP 10.1.1.1 10.1.1.2 10.1.1.5 10.1.1.6 Linkl的本地IP地址Metric 3 3 6 6 Linkl的费用ID 10.1.1.5 10.1.1.6 10.1.1.1 10.1.1.2 所连路由器的Router ID Link2 IP 10.1.1.9 10.1.1.13 10.1.1.10 10.1.1.14 Link2的本地IP地址Metric 2 4 2 4 Link2的费用Prefix 192.1.1.0/24 192.1.6.0/24 192.1.5.0/24 192.1.7.0/24 直连网络Netl的网络前缀
+
+Netl
+
+Metric 1 1 1 1 到达直连网络Netl的费用请回答下列问题。
+
+1 ）本题中的网络可抽象为数据结构中的哪种逻辑结构？
+
+2） 针对表中的内容，设计合理的链式存储结构，以保存表中的链路状态信息（LSI）.要求给出链式存储结构的数据类型定义，并画出对应表的链式存储结构示意图（示意图中可仅以ID标识结点）。
+
+3） 按照Dijkstra算法的策略，依次给出R1到达子网192.1.x.x的最短路径及费用。
+--- starter ---
+Flag=l 1 Next Flag=2「Next
+
+typedef struct(
+unsigned int ID, IP;
+JLinkNode; //Link 的结构
+typedef struct(
+unsigned int Prefix, Mask;
+JNetNode; //Net 的结构
+typedef struct Node(
+int Flag; ‘ 〃FMg=l 为 Link; F1ag=2 为 Net
+
+LinkNode Lnode;
+
+JLinkORNet;
+Unsigned int Metric;
+struct Node *next;
+}ArcNode; //孤结点
+typedef struct hNode{
+unsigned int RouterlD;
+ArcNode *LN_link;
+Struct hNode *next;
+}HNODE; //表头结点
+
+----J Flag=1 a Flag=1 a Flag=2 A
+
+Flag=1 ■ Flag=1 ___Flag 2 A
+
+---- Flag=1 A Flag=1 th Flag=2 ■ A
+
+
+===== 综合 6.4-02 [mode=code] =====
+已知有向图的边及权值为：1→2 为 3，1→3 为 3，1→4 为 6，2→3 为 4，2→5 为 5，3→5 为 4，4→6 为 5，6→3 为 3，5→7 为 3，6→7 为 7。
+
+1. 写出该图的邻接矩阵表示并据此给出从顶点 1 出发的深度优先遍历序列。
+2. 求该有向图的强连通分量的数目。
+3. 给出该图的任意两个拓扑序列。
+4. 若将该图视为无向图，分别用 Prim 算法和 Kruskal 算法求最小生成树。
+--- starter ---
+A=4 oo 48
+
+
+===== 综合 7.2-06 [mode=code] =====
+线性表中各结点的检索概率不等时，可用如下策略提高顺序检索的效率：若找到指定的结点，则将该结点和其前驱结点（若存在）交换，使得经常被检索的结点尽量位于表的前端。试设计在顺序结构和链式结构的线性表上实现上述策略的顺序检索算法。
+--- starter ---
+int SeqSrch(RcdType R[]r ElemType k){
+//顺序查找线性表,找到后和其前面的元素交换
+    int i=0;
+    while((R[i].key!=k)&&(i<n))
+        i++; //从前向后顺序查找指定结点
+    if (i<n&&i>0) { //若找到,则交换
+        temp=R[i];R[i]=R[i-l];R[i-1]=temp;
+        return --i; //交换成功,返回交换后的位置
+    }
+    else return -1; //交换失败
+}
+
+
+===== 综合 7.2-02 [mode=code] =====
+有序顺序表中的元素依次为 017,094,154,170,275,503,509,512,553,612,677,765, 897,908。
+
+1） 试画出对其进行折半查找的判定树。
+
+2） 若查找275或684的元素，将依次与表中的哪些元素比较？
+
+3） 计算查找成功的平均查找长度和查找不成功的平均查找长度。
+--- starter ---
+ASL蛔=-(1 + 2x2 + 3x4 + 4x7) = - 1 工 1 45
+
+
+===== 综合 7.2-04 [mode=code] =====
+已知一个有序顺序表A[0...8n-l]的表长为8n,并且表中没有关键字相同的数据元素。
+
+假设按下述方法查找一个关键字值等于给定值X的数据元素：先在A[7], A[15],A[23],---, A[8n-1]中进行顺序查找，若查找成功，则算法报告成功位置并返回；若不成功，则当A[8K-l]<X<A[8x（k+l）-l]时，可确定一个缩小的查找范围A[8k]~A[8x （k+l）-2],然后可在这个范围内执行折半查找。特殊情况:若X>A[8n-l]的关键字，则查找失败。
+
+1 ）画出描述上述查找过程的判定树。
+
+2）计算相等查找概率下查找成功的平均查找长度。
+--- starter ---
+土 沁 m \ «=1 i=2 i=3 i=4
+
+8;
+
+
+===== 综合 5.3-21 [mode=code] =====
+@2022统考真题]已知非空二叉树T的结点值均为正整数，采用顺序存储方式保存，数据结构定义如下：
+
+```text
+typedef struct { // 'MAX_SIZE 为已定义常量
+        int SqBiTNode[MAX_SIZE]; //保存二叉树结点值的数组
+        int ElemNum; //实际占用的数组元素个数
+} SqBiTree;
+```
+
+T中不存在的结点在数组SqBiTNode中用-1表示。例如，对于下图所示的两棵非空二叉树3和心，的存储结果如下:
+
+Tl.SqBiTNode 40 25 60 -1 30 -1 80 -1 -1 27
+
+```text
+Tl.ElemNum = 10
+```
+
+『2的存储结果如下：
+
+T2.SqBiTNode 40 50 60 -1 30 -1 -1 -1 -1 -1 35
+
+```text
+T2.ElemNum = 11
+```
+
+请设计一个尽可能高效的算法，判定一棵采用这种方式存储的二叉树是否为二叉搜索树，若是，则返回true,否则，返回false。要求：
+
+1 ）给出算法的基本设计思想。
+
+2）根据设计思想，采用C或C++语言描述算法，关键之处给出注释。
+--- starter ---
+#define false 0
+#define true 1
+typedef int bool;
+
+if (k<bt.ElemNum&&bt.SqBiTNode [k] !=T) {
+    if(!judgelnOrderBST(btz 2*k+1,val)) return false;
+    if(bt.SqBiTNode[k]<«*val) return false;
+    *val=bt . SqBiTNode[k];
+    if(!judgelnOrderBST(bt,2*k+2zval)) return false;
+}
+return true;
+
+#define false 0
+#define true 1
+typedef int bool;
+bool judgeBST(SqBiTree bt){
+    int k/in, *.pmin, *pmax;
+    pmin=(int *)malloc(sizeof(int)*(bt.ElemNum));
+    pmax=(int *)malloc(sizeof(int)*(bt.ElemNum));
+    for (k=0; k<bt .ElemNum; k++) 〃辅助数组初始化
+        pmin[kj^pmax[k]=bt.SqBiTNode[k];
+
+    if(bt.SqBiTNode[k]!=-1){
+        m= (k-1) /2; //双亲
+        if (k%2==l&&bt. SqBiTNode [m] >pmax [k]) //其为左孩子
+            pmin [m] =pmin [k]; ' ： : - ■■--
+        else if (k%2==0&&bt. SqBiTNode (m] <pmin [k]) //其为右孩子
+            pmax [m] -pmax [k];
+        else return false;
+} .
+    }
+return true;
+
+
+===== 综合 7.3-01 [mode=code] =====
+一棵二叉排序树按先序遍历得到的序列为(50, 38, 30,45,40, 48, 70, 60, 75, 80),试画出该二叉排序树，并求出等概率下查找成功和查找失败的平均查找长度。
+--- starter ---
+ASL = (1x1 +2x2 + 3x4 + 4x3)/10 = 25
+
+ASL = (3x5 + 4x6)711 =39/11
+
+
+===== 综合 7.3-11 [mode=code] =====
+编写一个递归算法，在一棵有n个结点的、随机建立起来的二叉排序树上查找第k小的元素，并返回指向该结点的指针。要求算法的平均时间复杂度为O(log2n)o二叉排序树的每个结点中除data, Ichild, rchild等数据成员外，增加一个count成员，保存以该结点为根的子树上的结点个数。
+--- starter ---
+BSTNode *Search_Small(BSTNode*t,int k){
+//在以t为根的子窸h寻找第k小的元素,返回其所在结点的指针。k从11开始计算
+//在树结点中增加一个count数据成员,存储以该结点为根的子树的结点个数
+    if(k<l||k>t->count)-return NULL;
+    if (t->lchildss=jssNULL) {
+        if(k=Hl) return t;
+        else return Search Small (t->rchildi, k-1);
+
+else{
+    if (t->lchild->count=33k-1) return t;
+    if(t->lchild->count>k-1) return Search_Small(t->lchild,k);
+    if (t->lchild->count<k-l)
+        return Search_Small(t->rchild, k-(t->lchild->count+l));
+}
+
+
+===== 综合 7.5-03 [mode=code] =====
+使用散列函数H（key） =key%ll,把一个整数值转换成散列表下标，现在要把数据｛1,13,12,34, 38, 33, 27, 22｝依次插入散列表。
+
+1 ）使用线性探测法来构造散列表.
+
+2）使用链地址法构造散列表。
+
+试针对这两种情况，分别确定查找成功所需的平均查找长度，及查找不成功所需的平均查找长度。
+--- starter ---
+ASL M =(1 + 1 + 1+ 3 + 4+14-2 + 8)/8 = 21/8
+
+ASL 失畋=(9 + 8 + 7 + 6 + 5 + 4 + 3 + 2+1 + 14- 1)/11 =47/11
+
+ASL m =(1x4 + 2x3 + 3)/8 = 13/8
+
+ASL 失放=(3 + 4 + 2 + 1 + 1 + 3 + 1 + 1 + 1 + 1 + 1)/11 = 19/11
+
+
+===== 综合 7.5-04 [mode=code] =====
+已知一组关键字为｛26,36,41,38,44,15,68,12,6,51,25｝,用链地址法解决冲突，假设装填因子a =0.75,散列函数的形式为H（key）=key%P,回答以下问题：
+
+1 ）构造出散列函数。
+
+2）分别计算出等概率情况下查找成功和查找失败的平均查找长度（查找失败的计算中只将与关键字的比较次数计算在内即可）。
+--- starter ---
+            ASL 物=(lx7 + 2x2 + 3xl +4xl)/ll = 18/11
+ASL 钢=(1+0 + 2 + 1+ 0+1 + 1+ 0 + 0 + 0+1 +0 + 4)/13 = 11/13
+
+
+===== 综合 7.5-05 [mode=code] =====
+设散列表为HT[0...12],即表的大小为/«=13。现采用双散列法解决冲突，散列函数和再散列函数分别为：
+
+Ho (key) =key%13 注：％是求余数运算(=MOD)
+
+```text
+H[= (H'-i+REV (key+1) %11+1) %13; i= 1, 2, 3,• • •, zn — 1
+```
+
+其中，函数REV(x)表示颠倒十进制数x的各位，如REV (37) =73, REV(7)=7等。若插入的关键码序列为(2, 8,31,20, 19, 18, 53,27),请回答：
+
+1 )画出插入这8个关键码后的散列表。
+
+2)计算查找成功的平均查找长度ASL。
+--- starter ---
+ASL 成功=(3 + 1 + 1 + 1 + 1 + 1 + 1+ 2)/8 = 11/8
+
+
+===== 综合 8.3-04 [mode=code] =====
+试重新编写考点精析中的快速排序的划分算法，使之每次选取的枢轴值都是随机地从当前子表中选择的。
+--- starter ---
+int Partition2(ElemType A[],int low,int high){
+    int rand_Index=low+rand()%(high-low+1);
+    Swap(A[rand_Index), Allow]); //将枢轴值交换到第一个元素
+    ElemType pivot=A[low] ; //置当前表中的第一个元素为枢轴值
+    int i=low; //使得表A[low...i]中的所有元素小于pivot,初始为空表
+
+        if (A[j]<pivot) //找到后,交换到前面
+            swap(A[++i] ,A[j]);
+    swap(A[i] ,A[low] ) ; //将基准元素插入最终位置
+    return i; //返回基准元素的位置
+}
+
+
+===== 综合 8.3-07 [mode=code] =====
+【2016 统考真题】已知由n （«^2）个正整数构成的集合A= {ak\0^k < n},将其划分为两个不相交的子集&和&,元素个数分别是"1和"2，&和思中的元素之和分别为S和$2。设计一个尽可能高效的划分算法，满足最小且IS-S2I最大。要求：
+
+1 )给出算法的基本设计思想。
+
+2\) 根据设计思想，采用C或C++语言描述算法，关键之处给出注释。
+
+3\) 说明你所设计算法的平均时间复杂度和空间复杂度。
+--- starter ---
+int setPartition(int a[1r int n){
+    int pivotkey, low=0, low0=0, high=n-1, high0=n-lr flag^l, ks=n/2/ i;
+    int sl=0,s2=0;
+    while(flag) {
+        pivotkey=a [low]; //选择枢轴
+        while (low<high) { 〃基于枢轴对数据进行划分
+            while (low<high && a [high] >==pivotkey) --high;
+                if(low!=high) a[low]=a[high];
+            while(low<high && a[low]<=pivotkey) ++low;
+                if(low!=high) a[high]=a[low];
+                                //end of while(low<high)
+        a [low]-pivotkey;
+        if(low~-k-1) 〃若枢轴是第n/2小元素,划分成功
+                flag=0;
+        else( //是否继续划分
+                if(low<k-1){
+                    Iow0=++J_ow;
+                    high=highO;
+                } -
+            else {
+                    highO=--high;
+                    low=low0;
+                }
+        }
+
+for(i~0;i<k;i++) sl+=a[i];
+for(i=k;i<n;i++) s2+=a[i];
+return s2-sl;
+
+
+===== 综合 8.6-05 [mode=code] =====
+【2021 统考真题】已知某排序算法如下：
+
+```text
+void cmpCountSort(int a[]r int b[]z int n){
+    int i,j,*count;
+    count=(int *)malloc(sizeof(int)*n);
+                                //C++语言：count=new int [n]; -k
+    for(i=0;i<n;i++) count[i]=0;
+    for(i=0;i<n-l;i++)
+        for(j=i+1;j<n;j++)
+            if(a[i]<a[j]) count[j]++;
+            else count[i]++;
+    for(i=0;i<n;i++) b[count[i]]= a[i];
+    free (count) ; //C++语言：delete count;
+} .
+```
+
+请回答下列问题。
+
+1 )若有 int a [] = {25,-10,25,10,11,19} ,b[6];,则调用 cmpCountSort (a,b, 6)
+
+后数组b中的内容是什么？
+
+2\) 若3中含有〃个元素，则算法执行过程中，元素之间的比较次数是多少？
+
+3\) 该算法是稳定的吗？若是，阐述理由；否则，修改为稳定排序算法。
+--- starter ---
+if (a[i]<=a(j]) count[j]++;
+else count[i]++;
+
+
+===== 综合 8.7-05 [mode=code] =====
+给出12个初始归并段，其长度分别为30,44. 8, 6, 3, 20, 60, 18, 9, 62, 68, 85.现要做4路外归并排序，试画出表示归并过程的最佳归并树，并计算该归并树的带权路径长度WPL。
+--- starter ---
+WPL = (3 + 6 + 8)x3 + (9+ 18 + 20 + 30 + 44 + 60 + 62)x2 + (68 + 85)x 1 = 51+486 + 153 = 690.
+

@@ -127,10 +127,274 @@ ALGraph BuildALG(int directed) {
 }
 `;
 
+const DLIST_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef int ElemType;
+typedef struct DNode {
+    ElemType data;
+    struct DNode *prior, *next;
+} DNode, *DLinkList;
+`;
+
+const DLIST_FREQ_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef int ElemType;
+typedef struct DNode {
+    ElemType data;
+    struct DNode *prior, *next;
+    int freq;
+} DNode, *DLinkList;
+`;
+
+const CLIST_CHAR_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef char ElemType;
+typedef struct LNode {
+    ElemType data;
+    struct LNode *next;
+} LNode, *LinkList;
+`;
+
+const STKQUE_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MAXS 100
+typedef int ElemType;
+typedef struct { ElemType data[MAXS]; int top; } Stack;
+typedef struct { ElemType data[MAXS]; int front, rear; } Queue;
+
+void InitStack(Stack *S) { S->top = -1; }
+int StackEmpty(Stack *S) { return S->top == -1; }
+void Push(Stack *S, ElemType x) { S->data[++S->top] = x; }
+void Pop(Stack *S, ElemType *x) { *x = S->data[S->top--]; }
+void InitQueue(Queue *Q) { Q->front = 0; Q->rear = 0; }
+int QueueEmpty(Queue *Q) { return Q->front == Q->rear; }
+void EnQueue(Queue *Q, ElemType x) { Q->data[Q->rear++] = x; }
+void DeQueue(Queue *Q, ElemType *x) { *x = Q->data[Q->front++]; }
+`;
+
+const SHARESTK_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define maxsize 100
+typedef int elemtp;
+typedef struct {
+    elemtp stack[maxsize];
+    int top[2];
+} stk;
+
+stk s;
+
+void InitShare(void) {
+    s.top[0] = -1;
+    s.top[1] = maxsize;
+}
+`;
+
+const TAGQ_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MaxSize 10
+typedef int ElemType;
+typedef struct {
+    ElemType data[MaxSize];
+    int front, rear, tag;
+} SqQueue;
+
+void InitQueue1(SqQueue *Q) {
+    Q->front = 0;
+    Q->rear = 0;
+    Q->tag = 0;
+}
+`;
+
+const STKS_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MAXS 50
+typedef int ElemType;
+typedef struct { ElemType data[MAXS]; int top; } Stack;
+
+void InitStack(Stack *S) { S->top = -1; }
+int StackEmpty(Stack *S) { return S->top == -1; }
+int StackOverflow(Stack *S) { return S->top == MAXS - 1; }
+void Push(Stack *S, ElemType x) { S->data[++S->top] = x; }
+void Pop(Stack *S, ElemType *x) { *x = S->data[S->top--]; }
+`;
+
+const LQUEUE_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef int ElemType;
+typedef struct LNode {
+    ElemType data;
+    struct LNode *next;
+} LNode;
+typedef struct { LNode *front, *rear; } LinkQueue;
+
+void InitQueue2(LinkQueue *Q) {
+    Q->front = Q->rear = (LNode *)malloc(sizeof(LNode));
+    Q->front->data = 0;
+    Q->front->next = NULL;
+}
+int QueueEmpty2(LinkQueue *Q) { return Q->front == Q->rear; }
+`;
+
+const EXPR_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+typedef struct node {
+    char data;
+    struct node *left, *right;
+} BTree;
+
+BTree *PostBuildExpr(char *s) {
+    BTree *st[128];
+    int top = -1, i, n = (int)strlen(s);
+    BTree *t, *a, *b;
+    for (i = 0; i < n; ++i) {
+        t = (BTree *)malloc(sizeof(BTree));
+        t->data = s[i];
+        t->left = NULL;
+        t->right = NULL;
+        if (s[i] == '+' || s[i] == '-' || s[i] == '*' || s[i] == '/') {
+            b = st[top--];
+            a = st[top--];
+            t->left = a;
+            t->right = b;
+        }
+        st[++top] = t;
+    }
+    return top >= 0 ? st[top] : NULL;
+}
+`;
+
+const SQBIT_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#define MAX_SIZE 100
+#define true 1
+#define false 0
+typedef int bool;
+typedef struct {
+    int SqBiTNode[MAX_SIZE];
+    int ElemNum;
+} SqBiTree;
+`;
+
+const CST_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct CSNode {
+    char data;
+    struct CSNode *firstchild, *nextsibling;
+} CSNode, *CSTree;
+`;
+
+const THR_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct BiThrNode {
+    char data;
+    struct BiThrNode *lchild, *rchild;
+    int ltag, rtag;
+} BiThrNode, *BiThrTree;
+
+BiThrTree BuildThrTree(void) {
+    char c;
+    if (scanf(" %c", &c) != 1) return NULL;
+    if (c == '#') return NULL;
+    BiThrNode *p = (BiThrNode *)malloc(sizeof(BiThrNode));
+    p->data = c;
+    p->ltag = 0;
+    p->rtag = 0;
+    p->lchild = BuildThrTree();
+    p->rchild = BuildThrTree();
+    return p;
+}
+
+BiThrTree thrPre = NULL;
+
+void InThread(BiThrTree p) {
+    if (p == NULL) return;
+    InThread(p->lchild);
+    if (p->lchild == NULL) {
+        p->lchild = thrPre;
+        p->ltag = 1;
+    }
+    if (thrPre != NULL && thrPre->rchild == NULL) {
+        thrPre->rchild = p;
+        thrPre->rtag = 1;
+    }
+    thrPre = p;
+    InThread(p->rchild);
+}
+
+void CreateInThread(BiThrTree T) {
+    thrPre = NULL;
+    InThread(T);
+    if (thrPre != NULL) thrPre->rtag = 1;
+}
+`;
+
 const ARR_PRE = `#include <stdio.h>
 #include <stdlib.h>
 #define MAXN 1000
 typedef int ElemType;
+`;
+
+const HASH_CHAIN_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct HNode {
+    int key;
+    struct HNode *next;
+} HNode;
+`;
+
+const DOUBLE_HASH_PRE = `#include <stdio.h>
+#include <stdlib.h>
+
+int REV(int x) {
+    int r = 0;
+    while (x > 0) {
+        r = r * 10 + x % 10;
+        x /= 10;
+    }
+    return r;
+}
+`;
+
+const BSTC_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct BSTNode {
+    int key;
+    int count;
+    struct BSTNode *lchild, *rchild;
+} BSTNode, *BSTree;
+
+BSTNode *BSTInsertC(BSTNode *T, int k) {
+    if (T == NULL) {
+        T = (BSTNode *)malloc(sizeof(BSTNode));
+        T->key = k;
+        T->count = 1;
+        T->lchild = NULL;
+        T->rchild = NULL;
+        return T;
+    }
+    if (k < T->key) T->lchild = BSTInsertC(T->lchild, k);
+    else if (k > T->key) T->rchild = BSTInsertC(T->rchild, k);
+    return T;
+}
+
+int CalcCount(BSTNode *T) {
+    if (T == NULL) return 0;
+    T->count = 1 + CalcCount(T->lchild) + CalcCount(T->rchild);
+    return T->count;
+}
+
+BSTNode *BuildCountBST(int n) {
+    BSTNode *T = NULL;
+    int i, k;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &k) != 1) break;
+        T = BSTInsertC(T, k);
+    }
+    CalcCount(T);
+    return T;
+}
 `;
 
 const BST_PRE = `#include <stdio.h>
@@ -3478,6 +3742,2399 @@ int IsBalanced(BSTree T) {
       { name: "含 0 和 100", stdin: "5\n100 0 50 0 100\n" },
       { name: "全相同", stdin: "4\n7 7 7 7\n" },
       { name: "单元素", stdin: "1\n5\n" },
+    ],
+  },
+
+  "综合 2.3-01": {
+    title: "递归删除单链表中值为 x 的结点",
+    sig: "void Del_X(LinkList *L, ElemType x)",
+    ret: "无返回值。L 是指向头指针的指针，*L 就是当前子链表的第一个结点（链表不带头结点），删掉首结点时要靠 *L 改写头指针。",
+    vars: [
+      "L：LinkList 的地址，*L 为第一个结点，可能为 NULL。",
+      "x：待删除的元素值。",
+      "递归的思路是：当前结点值等于 x 就删掉它并对新头继续递归，否则对 L->next 递归。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 x；输出第一行剩余结点个数，第二行剩余元素序列。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    LinkList L = NULL;
+    LNode *tail = NULL, *t;
+    int n = 0, i, v, x = 0, cnt = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        if (tail == NULL) L = t;
+        else tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d", &x) != 1) return 0;
+    Del_X(&L, x);
+    for (t = L; t != NULL; t = t->next) ++cnt;
+    printf("%d\\n", cnt);
+    for (t = L; t != NULL; t = t->next) printf("%d ", t->data);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void Del_X(LinkList *L, ElemType x) {
+    LNode *p;
+    if (*L == NULL) return;
+    if ((*L)->data == x) {
+        p = *L;
+        *L = (*L)->next;
+        free(p);
+        Del_X(L, x);
+    } else {
+        Del_X(&((*L)->next), x);
+    }
+}`,
+    cases: [
+      { name: "中间散布", stdin: "6\n1 2 3 2 4 2\n2\n" },
+      { name: "头部连续", stdin: "4\n2 2 3 4\n2\n" },
+      { name: "全删", stdin: "3\n2 2 2\n2\n" },
+      { name: "无匹配", stdin: "3\n1 5 9\n7\n" },
+      { name: "空表", stdin: "0\n3\n" },
+    ],
+  },
+
+  "综合 2.3-11": {
+    title: "就地拆分单链表为 A、B 两个表",
+    sig: "LinkList DisCreat(LinkList A)",
+    ret: "返回拆分出来的 B 表的头指针。A 表被原地改造成只含 a1,a2,……，B 表含 b1,b2,……，两表都保持原有相对次序。",
+    vars: [
+      "A：带头结点的单链表，元素依次是 a1,b1,a2,b2,……",
+      "ra：A 的尾指针，用来尾插；rb：B 的尾指针。",
+      "整个算法只改指针，不申请新结点（除 B 的头结点），空间 O(1)。",
+    ],
+    io: "第一行 n（偶数），第二行 n 个整数，按 a1 b1 a2 b2 的顺序给出；输出两行，分别是 A 表和 B 表的元素序列。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    LinkList A, B;
+    LNode *tail, *t, *p;
+    int n = 0, i, v;
+    if (scanf("%d", &n) != 1) return 0;
+    A = (LinkList)malloc(sizeof(LNode));
+    A->data = 0;
+    A->next = NULL;
+    tail = A;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    B = DisCreat(A);
+    printf("A:");
+    for (p = A->next; p != NULL; p = p->next) printf(" %d", p->data);
+    printf("\\nB:");
+    for (p = B->next; p != NULL; p = p->next) printf(" %d", p->data);
+    printf("\\n");
+    return 0;
+}`,
+    std: `LinkList DisCreat(LinkList A) {
+    LinkList B = (LinkList)malloc(sizeof(LNode));
+    LNode *p = A->next, *ra = A, *rb = B, *q;
+    B->data = 0;
+    B->next = NULL;
+    while (p != NULL) {
+        ra->next = p;
+        ra = p;
+        p = p->next;
+        if (p != NULL) {
+            q = p->next;
+            rb->next = p;
+            rb = p;
+            p = q;
+        }
+    }
+    ra->next = NULL;
+    rb->next = NULL;
+    return B;
+}`,
+    cases: [
+      { name: "三组", stdin: "6\n1 2 3 4 5 6\n" },
+      { name: "一组", stdin: "2\n10 20\n" },
+      { name: "空表", stdin: "0\n" },
+      { name: "四组", stdin: "8\n1 9 2 8 3 7 4 6\n" },
+    ],
+  },
+
+  "综合 2.3-22": {
+    title: "查找单链表倒数第 k 个结点",
+    sig: "int Search_k(LinkList list, int k)",
+    ret: "查找成功时先打印该结点的 data，再返回 1；k 大于表长或 k 小于等于 0 时只返回 0，不打印任何值。",
+    vars: [
+      "list：带头结点的单链表。",
+      "p、q：两个工作指针。p 先单独走 k 步，之后 p、q 同步走，p 到表尾时 q 正好落在倒数第 k 个结点。",
+      "count：记录 p 已经走过的结点数，用来判断 k 是否超过表长。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 k；输出先是该结点的值（仅成功时），最后一行是函数返回值。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    LinkList list;
+    LNode *tail, *t;
+    int n = 0, i, v, k = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    list = (LinkList)malloc(sizeof(LNode));
+    list->data = 0;
+    list->next = NULL;
+    tail = list;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d", &k) != 1) return 0;
+    printf("%d\\n", Search_k(list, k));
+    return 0;
+}`,
+    std: `int Search_k(LinkList list, int k) {
+    LNode *p = list->next, *q = list->next;
+    int count = 0;
+    if (k <= 0) return 0;
+    while (p != NULL) {
+        if (count < k) ++count;
+        else q = q->next;
+        p = p->next;
+    }
+    if (count < k) return 0;
+    printf("%d\\n", q->data);
+    return 1;
+}`,
+    cases: [
+      { name: "倒数第 2", stdin: "5\n1 2 3 4 5\n2\n" },
+      { name: "倒数第 1", stdin: "5\n10 20 30 40 50\n1\n" },
+      { name: "倒数第 n", stdin: "4\n7 8 9 10\n4\n" },
+      { name: "k 超长", stdin: "3\n1 2 3\n5\n" },
+      { name: "k 为 0", stdin: "3\n1 2 3\n0\n" },
+    ],
+  },
+
+  "综合 2.3-08": {
+    title: "求两个单链表的第一个公共结点",
+    sig: "LNode *SearchCommon(LinkList L1, LinkList L2)",
+    ret: "返回第一个公共结点的指针；两个链表没有公共结点时返回 NULL。",
+    vars: [
+      "L1、L2：两个带头结点的单链表，它们可以共享同一段后缀（Y 形）。",
+      "len1、len2：两表长度；dist：长度之差。",
+      "先让长表指针先走 dist 步对齐，再同步后移，第一次指针相等处就是公共结点。",
+    ],
+    io: "第一行 n1 n2 m，分别是两个表独立前缀的长度和共享后缀的长度；接下来依次是 n1 个前缀值、n2 个前缀值、m 个后缀值；输出公共结点的 data，没有公共结点输出 -1。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    LinkList L1, L2;
+    LNode *t1 = NULL, *t2 = NULL, *s = NULL, *st = NULL, *t, *p;
+    int n1 = 0, n2 = 0, m = 0, i, v;
+    if (scanf("%d %d %d", &n1, &n2, &m) != 3) return 0;
+    L1 = (LinkList)malloc(sizeof(LNode));
+    L1->data = 0;
+    L1->next = NULL;
+    t1 = L1;
+    for (i = 0; i < n1; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        t1->next = t;
+        t1 = t;
+    }
+    L2 = (LinkList)malloc(sizeof(LNode));
+    L2->data = 0;
+    L2->next = NULL;
+    t2 = L2;
+    for (i = 0; i < n2; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        t2->next = t;
+        t2 = t;
+    }
+    for (i = 0; i < m; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = NULL;
+        if (s == NULL) s = t;
+        else st->next = t;
+        st = t;
+    }
+    t1->next = s;
+    t2->next = s;
+    p = SearchCommon(L1, L2);
+    printf("%d\\n", p == NULL ? -1 : p->data);
+    return 0;
+}`,
+    std: `LNode *SearchCommon(LinkList L1, LinkList L2) {
+    int len1 = 0, len2 = 0, d, i;
+    LNode *p = L1->next, *q = L2->next;
+    while (p != NULL) { ++len1; p = p->next; }
+    while (q != NULL) { ++len2; q = q->next; }
+    p = L1->next;
+    q = L2->next;
+    d = len1 - len2;
+    if (d > 0) { for (i = 0; i < d; ++i) p = p->next; }
+    else { for (i = 0; i < -d; ++i) q = q->next; }
+    while (p != NULL && q != NULL && p != q) {
+        p = p->next;
+        q = q->next;
+    }
+    return p;
+}`,
+    cases: [
+      { name: "Y 形", stdin: "3 5 4\n1 2 3\n7 8 9 10 11\n20 21 22 23\n" },
+      { name: "无公共", stdin: "2 2 0\n1 2\n3 4\n" },
+      { name: "完全相同", stdin: "0 0 3\n5 6 7\n" },
+      { name: "等长前缀", stdin: "2 2 1\n1 2\n3 4\n9\n" },
+    ],
+  },
+
+  "综合 2.3-17": {
+    title: "判断循环双链表是否对称",
+    sig: "int Symmetry(DLinkList L)",
+    ret: "对称返回 1，不对称返回 0；空表和只有一个结点的表都算对称。",
+    vars: [
+      "L：带头结点的循环双链表，prior 指向前驱，next 指向后继，头结点的 prior 指向尾结点。",
+      "p 从 L->next 出发向右走，q 从 L->prior 出发向左走，两者相遇或交叉即结束。",
+      "跳出条件 p != q && q->next != p 同时覆盖奇数和偶数个结点两种情况。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出 1 或 0 表示是否对称。",
+    pre: DLIST_PRE,
+    post: `int main(void) {
+    DLinkList L;
+    DNode *t, *tail;
+    int n = 0, i, v, r;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (DLinkList)malloc(sizeof(DNode));
+    L->data = 0;
+    L->prior = L;
+    L->next = L;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (DNode *)malloc(sizeof(DNode));
+        t->data = v;
+        t->prior = tail;
+        t->next = L;
+        tail->next = t;
+        L->prior = t;
+        tail = t;
+    }
+    r = Symmetry(L);
+    printf("%d\\n", r);
+    return 0;
+}`,
+    std: `int Symmetry(DLinkList L) {
+    DNode *p = L->next, *q = L->prior;
+    while (p != q && q->next != p) {
+        if (p->data == q->data) {
+            p = p->next;
+            q = q->prior;
+        } else {
+            return 0;
+        }
+    }
+    return 1;
+}`,
+    cases: [
+      { name: "奇数回文", stdin: "3\n1 2 1\n" },
+      { name: "偶数回文", stdin: "4\n1 2 2 1\n" },
+      { name: "不对称", stdin: "3\n1 2 3\n" },
+      { name: "单结点", stdin: "1\n5\n" },
+      { name: "空表", stdin: "0\n" },
+    ],
+  },
+
+  "综合 2.3-18": {
+    title: "把两个循环单链表首尾相接",
+    sig: "LinkList Link(LinkList h1, LinkList h2)",
+    ret: "返回拼接后的头指针（即 h1）。拼接后仍是一个带头结点的循环单链表。",
+    vars: [
+      "h1、h2：两个带头结点的循环单链表，尾结点的 next 指回头结点。",
+      "p、q：分别找到两个表的尾结点。",
+      "接法是：h1 尾指向 h2 的第一个数据结点，h2 尾指向 h1 的头结点，这样整条链依然循环。",
+    ],
+    io: "第一行 n1，第二行 n1 个整数；第三行 n2，第四行 n2 个整数；输出拼接后从头结点之后依次访问到的所有元素。",
+    pre: LIST_PRE,
+    post: `int main(void) {
+    LinkList h1, h2, h;
+    LNode *tail, *t, *p;
+    int n1 = 0, n2 = 0, i, v;
+    if (scanf("%d", &n1) != 1) return 0;
+    h1 = (LinkList)malloc(sizeof(LNode));
+    h1->data = 0;
+    h1->next = h1;
+    tail = h1;
+    for (i = 0; i < n1; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = h1;
+        tail->next = t;
+        tail = t;
+    }
+    if (scanf("%d", &n2) != 1) return 0;
+    h2 = (LinkList)malloc(sizeof(LNode));
+    h2->data = 0;
+    h2->next = h2;
+    tail = h2;
+    for (i = 0; i < n2; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = v;
+        t->next = h2;
+        tail->next = t;
+        tail = t;
+    }
+    h = Link(h1, h2);
+    for (p = h->next; p != h; p = p->next) printf("%d ", p->data);
+    printf("\\n");
+    return 0;
+}`,
+    std: `LinkList Link(LinkList h1, LinkList h2) {
+    LNode *p = h1, *q = h2;
+    while (p->next != h1) p = p->next;
+    while (q->next != h2) q = q->next;
+    if (h2->next == h2) {
+        free(h2);
+        return h1;
+    }
+    p->next = h2->next;
+    q->next = h1;
+    free(h2);
+    return h1;
+}`,
+    cases: [
+      { name: "两表非空", stdin: "3\n1 2 3\n2\n8 9\n" },
+      { name: "h1 空", stdin: "0\n2\n8 9\n" },
+      { name: "h2 空", stdin: "2\n1 2\n0\n" },
+      { name: "各一个", stdin: "1\n4\n1\n6\n" },
+    ],
+  },
+
+  "综合 3.1-04": {
+    title: "判断单链表中的字符序列是否中心对称",
+    sig: "int IsSymmetry(LinkList L, int n)",
+    ret: "中心对称返回 1，否则返回 0；空串和单字符都算中心对称。",
+    vars: [
+      "L：带头结点的字符单链表，data 是 char 类型。",
+      "n：字符个数，题目已给出，用来确定前一半进栈的个数。",
+      "做法是前半段压栈，跳过中心结点（n 为奇数时），再把后半段与栈顶逐个比较。",
+    ],
+    io: "输入一行不含空格的字符串；输出 1 或 0 表示是否中心对称。",
+    pre: CLIST_CHAR_PRE,
+    post: `int main(void) {
+    char buf[256];
+    LinkList L;
+    LNode *tail, *t;
+    int n = 0, i, r;
+    if (scanf("%255s", buf) != 1) return 0;
+    n = (int)strlen(buf);
+    L = (LinkList)malloc(sizeof(LNode));
+    L->data = 0;
+    L->next = NULL;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = buf[i];
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+    r = IsSymmetry(L, n);
+    printf("%d\\n", r);
+    return 0;
+}`,
+    std: `int IsSymmetry(LinkList L, int n) {
+    char s[128];
+    int i, top = 0;
+    LNode *p = L->next;
+    for (i = 0; i < n / 2; ++i) {
+        s[top++] = p->data;
+        p = p->next;
+    }
+    if (n % 2 == 1) p = p->next;
+    while (p != NULL) {
+        if (top == 0) return 0;
+        if (s[--top] != p->data) return 0;
+        p = p->next;
+    }
+    return top == 0 ? 1 : 0;
+}`,
+    cases: [
+      { name: "xyx", stdin: "xyx\n" },
+      { name: "xyyx", stdin: "xyyx\n" },
+      { name: "abcba", stdin: "abcba\n" },
+      { name: "abcd", stdin: "abcd\n" },
+      { name: "ab", stdin: "ab\n" },
+      { name: "单字符", stdin: "a\n" },
+    ],
+  },
+
+  "综合 3.1-05": {
+    title: "两栈共享存储空间的入栈与出栈",
+    sig: "int push(int i, elemtp x) / int pop(int i, elemtp *x)",
+    ret: "push 入栈成功返回 1，栈满返回 0；pop 出栈成功返回 1 并把栈顶值写入 *x，栈空返回 0。i 只允许 0 或 1。",
+    vars: [
+      "s：全局共享栈，s.stack[maxsize] 是存储区，s.top[0] 是左栈栈顶（从 -1 往上长），s.top[1] 是右栈栈顶（从 maxsize 往下长）。",
+      "判满条件：s.top[1] - s.top[0] == 1，此时两个栈顶相邻，存储区已用尽。",
+      "s 由 main 调用 InitShare() 初始化：top[0] = -1，top[1] = maxsize。",
+    ],
+    io: "第一行 m（操作条数）；随后 m 行，每行 `1 i x` 表示向第 i 个栈压入 x，`2 i` 表示从第 i 个栈弹出。每行输出一次操作结果。",
+    pre: SHARESTK_PRE,
+    post: `int main(void) {
+    int m = 0, k, op, i, ok;
+    elemtp x = 0;
+    InitShare();
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &op) != 1) return 0;
+        if (op == 1) {
+            if (scanf("%d %d", &i, &x) != 2) return 0;
+            ok = push(i, x);
+            printf("push %d -> %d\\n", i, ok);
+        } else {
+            if (scanf("%d", &i) != 1) return 0;
+            ok = pop(i, &x);
+            if (ok) printf("pop %d -> %d\\n", i, x);
+            else printf("pop %d -> EMPTY\\n", i);
+        }
+    }
+    return 0;
+}`,
+    std: `int push(int i, elemtp x) {
+    if (i < 0 || i > 1) return 0;
+    if (s.top[1] - s.top[0] == 1) return 0;
+    if (i == 0) s.stack[++s.top[0]] = x;
+    else s.stack[--s.top[1]] = x;
+    return 1;
+}
+
+int pop(int i, elemtp *x) {
+    if (i < 0 || i > 1) return 0;
+    if (i == 0) {
+        if (s.top[0] == -1) return 0;
+        *x = s.stack[s.top[0]--];
+    } else {
+        if (s.top[1] == maxsize) return 0;
+        *x = s.stack[s.top[1]++];
+    }
+    return 1;
+}`,
+    cases: [
+      { name: "交替进出", stdin: "6\n1 0 5\n1 1 7\n2 0\n2 1\n2 0\n2 1\n" },
+      { name: "空栈出栈", stdin: "3\n2 0\n2 1\n1 1 3\n" },
+      { name: "非法栈号", stdin: "2\n1 2 9\n2 5\n" },
+      { name: "同侧连续压入", stdin: "5\n1 0 1\n1 0 2\n1 0 3\n2 0\n2 0\n" },
+    ],
+  },
+
+  "综合 3.2-01": {
+    title: "带 tag 的循环队列入队出队",
+    sig: "int EnQueue1(SqQueue *Q, ElemType x) / int DeQueue1(SqQueue *Q, ElemType *x)",
+    ret: "EnQueue1 入队成功返回 1，队满返回 0；DeQueue1 出队成功返回 1 并把值写入 *x，队空返回 0。",
+    vars: [
+      "Q->front 指向队头元素，Q->rear 指向队尾元素的下一个空位，MaxSize 为 10。",
+      "Q->tag：最近一次操作若是入队置 1，若是出队置 0，用来区分 front == rear 时到底是空还是满。",
+      "队满条件：front == rear && tag == 1；队空条件：front == rear && tag == 0。",
+    ],
+    io: "第一行 m（操作条数）；随后 m 行，`1 x` 表示入队，`2` 表示出队。每行输出一次操作结果。",
+    pre: TAGQ_PRE,
+    post: `int main(void) {
+    SqQueue Q;
+    int m = 0, k, op, ok;
+    ElemType x = 0;
+    InitQueue1(&Q);
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &op) != 1) return 0;
+        if (op == 1) {
+            if (scanf("%d", &x) != 1) return 0;
+            ok = EnQueue1(&Q, x);
+            printf("enqueue %d -> %d\\n", x, ok);
+        } else {
+            ok = DeQueue1(&Q, &x);
+            if (ok) printf("dequeue -> %d\\n", x);
+            else printf("dequeue -> EMPTY\\n");
+        }
+    }
+    return 0;
+}`,
+    std: `int EnQueue1(SqQueue *Q, ElemType x) {
+    if (Q->front == Q->rear && Q->tag == 1) return 0;
+    Q->data[Q->rear] = x;
+    Q->rear = (Q->rear + 1) % MaxSize;
+    Q->tag = 1;
+    return 1;
+}
+
+int DeQueue1(SqQueue *Q, ElemType *x) {
+    if (Q->front == Q->rear && Q->tag == 0) return 0;
+    *x = Q->data[Q->front];
+    Q->front = (Q->front + 1) % MaxSize;
+    Q->tag = 0;
+    return 1;
+}`,
+    cases: [
+      { name: "基本进出", stdin: "5\n1 10\n1 20\n2\n2\n2\n" },
+      { name: "装满再入队", stdin: "12\n1 1\n1 2\n1 3\n1 4\n1 5\n1 6\n1 7\n1 8\n1 9\n1 10\n1 11\n2\n" },
+      { name: "空队出队", stdin: "2\n2\n1 5\n" },
+    ],
+  },
+
+  "综合 3.2-02": {
+    title: "用栈把队列中的元素逆置",
+    sig: "void Inverser(Stack *S, Queue *Q)",
+    ret: "无返回值。函数结束时队列 Q 里的元素顺序应当变成原来的逆序，栈 S 用完后为空。",
+    vars: [
+      "Q：队列，front 指向队头，rear 指向队尾后一位，EnQueue/DeQueue 已在骨架里给出。",
+      "S：空栈，Push/Pop 已在骨架里给出。",
+      "做法是元素全部出队压栈，再全部出栈入队，两次搬运就完成逆置。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出逆置后依次出队的元素序列。",
+    pre: STKQUE_PRE,
+    post: `int main(void) {
+    Stack S;
+    Queue Q;
+    int n = 0, i;
+    ElemType v = 0;
+    InitStack(&S);
+    InitQueue(&Q);
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        EnQueue(&Q, v);
+    }
+    Inverser(&S, &Q);
+    while (!QueueEmpty(&Q)) {
+        DeQueue(&Q, &v);
+        printf("%d ", v);
+    }
+    printf("\\n");
+    return 0;
+}`,
+    std: `void Inverser(Stack *S, Queue *Q) {
+    ElemType x;
+    while (!QueueEmpty(Q)) {
+        DeQueue(Q, &x);
+        Push(S, x);
+    }
+    while (!StackEmpty(S)) {
+        Pop(S, &x);
+        EnQueue(Q, x);
+    }
+}`,
+    cases: [
+      { name: "五个元素", stdin: "5\n1 2 3 4 5\n" },
+      { name: "单元素", stdin: "1\n42\n" },
+      { name: "空队列", stdin: "0\n" },
+      { name: "含负数", stdin: "4\n-3 0 7 -9\n" },
+    ],
+  },
+
+  "综合 3.2-03": {
+    title: "用两个栈模拟队列",
+    sig: "int EnQueue(Stack *S1, Stack *S2, ElemType e) / int DeQueue(Stack *S1, Stack *S2, ElemType *x) / int QueueEmpty(Stack *S1, Stack *S2)",
+    ret: "EnQueue 成功返回 1，失败返回 0（S1 已满而 S2 里还压着元素时必须失败）；DeQueue 成功返回 1 并把出队值写入 *x，队空返回 0；QueueEmpty 两栈都空时返回 1。",
+    vars: [
+      "S1：入队栈，新元素一律压到这里。",
+      "S2：出队栈，只有在 S2 空时才把 S1 全部倒过来，保证出队顺序仍是先进先出。",
+      "StackOverflow(S) 判断栈满，MAXS 为 50。",
+    ],
+    io: "第一行 m（操作条数）；随后 m 行，`1 x` 为入队，`2` 为出队。每行输出一次结果。",
+    pre: STKS_PRE,
+    post: `int main(void) {
+    Stack S1, S2;
+    int m = 0, k, op, ok;
+    ElemType x = 0;
+    InitStack(&S1);
+    InitStack(&S2);
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &op) != 1) return 0;
+        if (op == 1) {
+            if (scanf("%d", &x) != 1) return 0;
+            ok = EnQueue(&S1, &S2, x);
+            printf("enqueue %d -> %d\\n", x, ok);
+        } else {
+            ok = DeQueue(&S1, &S2, &x);
+            if (ok) printf("dequeue -> %d\\n", x);
+            else printf("dequeue -> EMPTY\\n");
+        }
+    }
+    printf("empty -> %d\\n", QueueEmpty(&S1, &S2));
+    return 0;
+}`,
+    std: `int EnQueue(Stack *S1, Stack *S2, ElemType e) {
+    ElemType y;
+    if (!StackOverflow(S1)) {
+        Push(S1, e);
+        return 1;
+    }
+    if (!StackEmpty(S2)) return 0;
+    while (!StackEmpty(S1)) {
+        Pop(S1, &y);
+        Push(S2, y);
+    }
+    Push(S1, e);
+    return 1;
+}
+
+int DeQueue(Stack *S1, Stack *S2, ElemType *x) {
+    ElemType y;
+    if (!StackEmpty(S2)) {
+        Pop(S2, x);
+        return 1;
+    }
+    if (StackEmpty(S1)) return 0;
+    while (!StackEmpty(S1)) {
+        Pop(S1, &y);
+        Push(S2, y);
+    }
+    Pop(S2, x);
+    return 1;
+}
+
+int QueueEmpty(Stack *S1, Stack *S2) {
+    return StackEmpty(S1) && StackEmpty(S2);
+}`,
+    cases: [
+      { name: "穿插进出", stdin: "5\n1 10\n1 20\n2\n1 30\n2\n" },
+      { name: "空队列出队", stdin: "2\n2\n1 5\n" },
+      { name: "先入三个再一次出", stdin: "5\n1 1\n1 2\n1 3\n2\n2\n" },
+      { name: "全部出空", stdin: "4\n1 7\n2\n2\n1 9\n" },
+    ],
+  },
+
+  "综合 3.2-04": {
+    title: "出队空间可复用的链式队列",
+    sig: "int EnQueue2(LinkQueue *Q, ElemType x) / int DeQueue2(LinkQueue *Q, ElemType *x)",
+    ret: "EnQueue2 入队成功返回 1，DeQueue2 出队成功返回 1 并把值写入 *x，队空时返回 0。",
+    vars: [
+      "Q->front：指向队头结点（带头结点时即为头结点）；Q->rear：指向队尾结点。",
+      "QueueEmpty2 由骨架提供，判据是 front == rear。",
+      "入队只新建一个结点接到 rear 后面，出队释放（或回收）一个结点，两步都是 O(1)。",
+    ],
+    io: "第一行 m（操作条数）；随后 m 行，`1 x` 为入队，`2` 为出队。每行输出一次结果。",
+    pre: LQUEUE_PRE,
+    post: `int main(void) {
+    LinkQueue Q;
+    int m = 0, k, op, ok;
+    ElemType x = 0;
+    InitQueue2(&Q);
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &op) != 1) return 0;
+        if (op == 1) {
+            if (scanf("%d", &x) != 1) return 0;
+            ok = EnQueue2(&Q, x);
+            printf("enqueue %d -> %d\\n", x, ok);
+        } else {
+            ok = DeQueue2(&Q, &x);
+            if (ok) printf("dequeue -> %d\\n", x);
+            else printf("dequeue -> EMPTY\\n");
+        }
+    }
+    printf("empty -> %d\\n", QueueEmpty2(&Q));
+    return 0;
+}`,
+    std: `int EnQueue2(LinkQueue *Q, ElemType x) {
+    LNode *p = (LNode *)malloc(sizeof(LNode));
+    if (p == NULL) return 0;
+    p->data = x;
+    p->next = NULL;
+    Q->rear->next = p;
+    Q->rear = p;
+    return 1;
+}
+
+int DeQueue2(LinkQueue *Q, ElemType *x) {
+    LNode *p;
+    if (Q->front == Q->rear) return 0;
+    p = Q->front->next;
+    *x = p->data;
+    Q->front->next = p->next;
+    if (Q->rear == p) Q->rear = Q->front;
+    free(p);
+    return 1;
+}`,
+    cases: [
+      { name: "基本进出", stdin: "4\n1 1\n1 2\n2\n2\n" },
+      { name: "空队出队", stdin: "2\n2\n1 8\n" },
+      { name: "边进边出", stdin: "6\n1 5\n2\n1 6\n2\n1 7\n2\n" },
+      { name: "连续出空", stdin: "5\n1 3\n1 4\n2\n2\n2\n" },
+    ],
+  },
+
+  "综合 3.3-02": {
+    title: "火车车厢调度（软座排在硬座之前）",
+    sig: "void Train_Arrange(char *train)",
+    ret: "无返回值。函数直接在原字符串上改写，结束时所有 S（软座）排在前面，所有 H（硬座）排在后面，长度不变。",
+    vars: [
+      "train：以 \\0 结尾的字符串，只含字符 H（硬座）和 S（软座）。",
+      "p：读指针，向后扫描原串；q：写指针，指向下一个要写入的位置。",
+      "用栈暂存遇到的 H，扫描完再把栈里的 H 依次接到尾部，正好实现两类车厢分离。",
+    ],
+    io: "输入一行只含 H 和 S 的字符串；输出调度后的字符串。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char s[256];
+    if (scanf("%255s", s) != 1) return 0;
+    Train_Arrange(s);
+    printf("%s\\n", s);
+    return 0;
+}`,
+    std: `void Train_Arrange(char *train) {
+    char stack[256];
+    int top = 0;
+    char *p = train, *q = train;
+    while (*p) {
+        if (*p == 'H') stack[top++] = *p;
+        else *q++ = *p;
+        ++p;
+    }
+    while (top > 0) *q++ = stack[--top];
+    *q = '\\0';
+}`,
+    cases: [
+      { name: "交替", stdin: "HSHSHS\n" },
+      { name: "混合", stdin: "SHHSS\n" },
+      { name: "全硬座", stdin: "HHHH\n" },
+      { name: "全软座", stdin: "SSS\n" },
+    ],
+  },
+
+  "综合 3.3-03": {
+    title: "非递归计算 Pn(x)",
+    sig: "double Pn(int n, double x)",
+    ret: "返回 Pn(x) 的值。n = 0 时为 1，n = 1 时为 2x，n > 1 时为 2x·P(n-1) - 2(n-1)·P(n-2)。",
+    vars: [
+      "n：递归阶数，n >= 0。",
+      "x：自变量，用 double。",
+      "fv1 保存 P(i-2)，fv2 保存 P(i-1)，从 i = 2 递推到 n 就能把递归改成循环。",
+    ],
+    io: "输入一行 `n x`；输出保留 4 位小数的结果。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int n = 0;
+    double x = 0.0;
+    if (scanf("%d %lf", &n, &x) != 2) return 0;
+    printf("%.4f\\n", Pn(n, x));
+    return 0;
+}`,
+    std: `double Pn(int n, double x) {
+    double fv1 = 1.0, fv2 = 2.0 * x, f;
+    int i;
+    if (n == 0) return fv1;
+    for (i = 2; i <= n; ++i) {
+        f = 2.0 * x * fv2 - 2.0 * (i - 1) * fv1;
+        fv1 = fv2;
+        fv2 = f;
+    }
+    return fv2;
+}`,
+    cases: [
+      { name: "n=0", stdin: "0 1.5\n" },
+      { name: "n=1", stdin: "1 1.5\n" },
+      { name: "n=2", stdin: "2 2.0\n" },
+      { name: "n=3", stdin: "3 1.0\n" },
+      { name: "n=5", stdin: "5 0.5\n" },
+    ],
+  },
+
+  "综合 5.1-03": {
+    title: "由各度数的结点个数求叶结点数",
+    sig: "int CountLeafNum(int n[], int m)",
+    ret: "返回叶结点个数 n0 = 1 + Σ(i-1)·ni（i 从 1 到 m）。",
+    vars: [
+      "n[i]：度为 i 的结点个数，i 取值 1..m，n[0] 不使用。",
+      "m：树中出现的最大度数。",
+      "依据是树的度数总和 = 结点数 - 1，即 Σ i·ni = n0 + Σ ni - 1。",
+    ],
+    io: "第一行 m，第二行 m 个整数依次是 n1,n2,…,nm；输出叶结点个数。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int n[MAXN], m = 0, i;
+    if (scanf("%d", &m) != 1) return 0;
+    if (m > MAXN - 1) m = MAXN - 1;
+    for (i = 1; i <= m; ++i) {
+        if (scanf("%d", &n[i]) != 1) return 0;
+    }
+    printf("%d\\n", CountLeafNum(n, m));
+    return 0;
+}`,
+    std: `int CountLeafNum(int n[], int m) {
+    int i, s = 1;
+    for (i = 2; i <= m; ++i) s += (i - 1) * n[i];
+    return s;
+}`,
+    cases: [
+      { name: "三个各 1", stdin: "3\n1 1 1\n" },
+      { name: "度数 1、2 各 1", stdin: "2\n1 1\n" },
+      { name: "单结点树", stdin: "1\n0\n" },
+      { name: "四层各 1", stdin: "4\n1 1 1 1\n" },
+      { name: "3 个一度 2 个二度", stdin: "2\n3 2\n" },
+    ],
+  },
+
+  "综合 5.3-03": {
+    title: "后序遍历二叉树的非递归算法",
+    sig: "void PostOrder(BiTree T)",
+    ret: "无返回值。按后序（左、右、根）顺序把每个结点的 data 打印出来，直接连成一行。",
+    vars: [
+      "T：二叉链表存储的二叉树，空树用 # 输入，结点 data 为 char。",
+      "st：辅助栈，按先左后右的方式入栈。",
+      "r：记录上一个被访问的结点，用来判断右子树是否已经处理完，避免重复进入右子树。",
+    ],
+    io: "输入一行扩展先序遍历序列（# 表示空结点，如 ABD##E##C#F##）；输出后序序列。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    PostOrder(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void PostOrder(BiTree T) {
+    BiTree st[128], p = T, r = NULL;
+    int top = 0;
+    while (p != NULL || top > 0) {
+        if (p != NULL) {
+            st[top++] = p;
+            p = p->lchild;
+        } else {
+            p = st[top - 1];
+            if (p->rchild != NULL && p->rchild != r) {
+                p = p->rchild;
+            } else {
+                --top;
+                printf("%c", p->data);
+                r = p;
+                p = NULL;
+            }
+        }
+    }
+}`,
+    cases: [
+      { name: "常规树", stdin: "ABD##E##C#F##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "左斜", stdin: "ABC####\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.3-06": {
+    title: "由先序和中序序列建立二叉树",
+    sig: "BiTree BuildFromPreIn(char A[], char B[], int n)",
+    ret: "返回建好的二叉树根指针；n 为 0 时返回 NULL。",
+    vars: [
+      "A：先序遍历序列，长度 n。",
+      "B：中序遍历序列，长度 n，结点值互不相同。",
+      "A[0] 是根，在 B 中找到它的位置就能把左右子树的中序段分开，再按长度切分先序段递归建树。",
+    ],
+    io: "输入两行，第一行先序序列，第二行中序序列；输出建好的树重新先序遍历的结果。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    char A[128], B[128];
+    BiTree T;
+    int n = 0;
+    if (scanf("%127s %127s", A, B) != 2) return 0;
+    while (A[n] != '\\0') ++n;
+    T = BuildFromPreIn(A, B, n);
+    PrintPre(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `static BiTree buildSeg(char *pre, char *in, int pl, int pr, int il, int ir) {
+    int i, k;
+    BiTree root;
+    if (pl > pr) return NULL;
+    root = (BiTree)malloc(sizeof(BiTNode));
+    root->data = pre[pl];
+    for (i = il; i <= ir; ++i) {
+        if (in[i] == pre[pl]) break;
+    }
+    k = i - il;
+    root->lchild = buildSeg(pre, in, pl + 1, pl + k, il, i - 1);
+    root->rchild = buildSeg(pre, in, pl + k + 1, pr, i + 1, ir);
+    return root;
+}
+
+BiTree BuildFromPreIn(char A[], char B[], int n) {
+    return buildSeg(A, B, 0, n - 1, 0, n - 1);
+}`,
+    cases: [
+      { name: "七结点", stdin: "ABDECFG DBEAFCG\n" },
+      { name: "单结点", stdin: "A A\n" },
+      { name: "右斜", stdin: "ABCD BCDA\n" },
+      { name: "左斜", stdin: "ABCD DCBA\n" },
+    ],
+  },
+
+  "综合 5.3-16": {
+    title: "把叶结点按从左到右串成单链表",
+    sig: "BiTree LinkLeaf(BiTree T)",
+    ret: "返回第一个叶结点的指针，也就是链表头；没有叶结点时返回 NULL。所有叶结点用 rchild 指针相连，最后一个的 rchild 置 NULL。",
+    vars: [
+      "T：二叉链表存储的二叉树。",
+      "pre：中序遍历时指向上一个被链入的叶结点。",
+      "中序遍历保证叶结点按从左到右的顺序被串起来，左孩子的叶先于右孩子的叶。",
+    ],
+    io: "输入一行扩展先序序列；输出叶结点链表从前到后的 data 序列。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree(), head, p;
+    head = LinkLeaf(T);
+    for (p = head; p != NULL; p = p->rchild) printf("%c", p->data);
+    printf("\\n");
+    return 0;
+}`,
+    std: `static BiTree head = NULL, preL = NULL;
+
+static void inorderLink(BiTree bt) {
+    if (bt == NULL) return;
+    inorderLink(bt->lchild);
+    if (bt->lchild == NULL && bt->rchild == NULL) {
+        if (preL == NULL) {
+            head = bt;
+            preL = bt;
+        } else {
+            preL->rchild = bt;
+            preL = bt;
+        }
+    }
+    inorderLink(bt->rchild);
+}
+
+BiTree LinkLeaf(BiTree T) {
+    head = NULL;
+    preL = NULL;
+    inorderLink(T);
+    if (preL != NULL) preL->rchild = NULL;
+    return head;
+}`,
+    cases: [
+      { name: "常规树", stdin: "ABD##E##C#F##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+      { name: "满树", stdin: "AB##C##\n" },
+    ],
+  },
+
+  "综合 5.3-20": {
+    title: "表达式树转等价中缀表达式",
+    sig: "void BtreeToE(BTree *root)",
+    ret: "无返回值。把表达式树输出成中缀表达式，用括号表达运算次序，根表达式外层不加括号，而每个子表达式都要加一层括号。",
+    vars: [
+      "root：表达式树根，叶结点是操作数，内部结点是运算符。",
+      "deep：当前结点的层数，根为 1；deep>1 说明它是某个运算符的子表达式，输出时要括起来。",
+      "左子树、根运算符、右子树依次输出即为中缀形式。",
+    ],
+    io: "输入一行后缀表达式（操作数用单个小写字母，运算符为 + - * /）；输出对应的中缀表达式（子表达式带括号）。",
+    pre: EXPR_PRE,
+    post: `int main(void) {
+    char s[128];
+    BTree *root;
+    if (scanf("%127s", s) != 1) return 0;
+    root = PostBuildExpr(s);
+    BtreeToE(root);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void BtreeToExp(BTree *root, int deep) {
+    if (root == NULL) return;
+    if (root->left == NULL && root->right == NULL) {
+        printf("%c", root->data);
+        return;
+    }
+    if (deep > 1) printf("(");
+    BtreeToExp(root->left, deep + 1);
+    printf("%c", root->data);
+    BtreeToExp(root->right, deep + 1);
+    if (deep > 1) printf(")");
+}
+
+void BtreeToE(BTree *root) {
+    BtreeToExp(root, 1);
+}`,
+    cases: [
+      { name: "加后乘", stdin: "ab+c*\n" },
+      { name: "a*b+(c-d)", stdin: "ab*cd-+\n" },
+      { name: "单个加号", stdin: "ab+\n" },
+      { name: "单操作数", stdin: "a\n" },
+      { name: "两层乘加", stdin: "ab*cd*+\n" },
+    ],
+  },
+
+  "综合 5.3-13": {
+    title: "求二叉树中两个结点的最近公共祖先",
+    sig: "BiTree Ancestor(BiTree ROOT, BiTree p, BiTree q)",
+    ret: "返回 p 和 q 的最近公共祖先结点指针；如果两个结点不在同一棵树里，返回 NULL。",
+    vars: [
+      "ROOT：二叉树根指针。",
+      "p、q：指向树中两个结点的指针，结点的值互不相同。",
+      "递归思路：某结点为 p 或 q 时直接返回它；左右子树分别递归，若两边都有返回值，当前结点就是答案。",
+    ],
+    io: "第一行扩展先序序列，第二行两个结点值；输出最近公共祖先的 data，无公共祖先输出 -1。",
+    pre: TREE_PRE,
+    post: `static BiTree findNode(BiTree t, char c) {
+    BiTree r;
+    if (t == NULL) return NULL;
+    if (t->data == c) return t;
+    r = findNode(t->lchild, c);
+    if (r != NULL) return r;
+    return findNode(t->rchild, c);
+}
+
+int main(void) {
+    BiTree T, p, q, r;
+    char a = 0, b = 0;
+    T = BuildTree();
+    if (scanf(" %c %c", &a, &b) != 2) return 0;
+    p = findNode(T, a);
+    q = findNode(T, b);
+    r = Ancestor(T, p, q);
+    printf("%c\\n", r == NULL ? '-' : r->data);
+    return 0;
+}`,
+    std: `BiTree Ancestor(BiTree ROOT, BiTree p, BiTree q) {
+    BiTree l, r;
+    if (ROOT == NULL) return NULL;
+    if (ROOT == p || ROOT == q) return ROOT;
+    l = Ancestor(ROOT->lchild, p, q);
+    r = Ancestor(ROOT->rchild, p, q);
+    if (l != NULL && r != NULL) return ROOT;
+    return l != NULL ? l : r;
+}`,
+    cases: [
+      { name: "同侧", stdin: "ABD##E##C#F##\nD E\n" },
+      { name: "异侧", stdin: "ABD##E##C#F##\nD F\n" },
+      { name: "根即祖先", stdin: "AB##C##\nB C\n" },
+      { name: "结点自己是祖先", stdin: "AB##C##\nA B\n" },
+    ],
+  },
+
+  "综合 5.3-21": {
+    title: "判定顺序存储的二叉树是否为二叉搜索树",
+    sig: "bool judgeBST(SqBiTree bt)",
+    ret: "是二叉搜索树返回 true，否则返回 false（用 1/0 输出）。",
+    vars: [
+      "bt.SqBiTNode：按完全二叉树的下标存放结点值，下标 0 是根，i 的左孩子是 2i+1、右孩子是 2i+2。",
+      "bt.ElemNum：数组实际占用的元素个数，越界的下标视为空。",
+      "-1 表示该位置没有结点。",
+    ],
+    io: "第一行 ElemNum，第二行 ElemNum 个整数（-1 表示空位）；输出 1 表示是 BST，0 表示不是。",
+    pre: SQBIT_PRE,
+    post: `int main(void) {
+    SqBiTree bt;
+    int n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAX_SIZE) n = MAX_SIZE;
+    bt.ElemNum = n;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &bt.SqBiTNode[i]) != 1) return 0;
+    }
+    printf("%d\\n", judgeBST(bt) ? 1 : 0);
+    return 0;
+}`,
+    std: `static bool checkInOrder(SqBiTree bt, int k, int *prev) {
+    if (k >= bt.ElemNum || bt.SqBiTNode[k] == -1) return true;
+    if (!checkInOrder(bt, 2 * k + 1, prev)) return false;
+    if (bt.SqBiTNode[k] <= *prev) return false;
+    *prev = bt.SqBiTNode[k];
+    if (!checkInOrder(bt, 2 * k + 2, prev)) return false;
+    return true;
+}
+
+bool judgeBST(SqBiTree bt) {
+    int prev = -2147483647;
+    return checkInOrder(bt, 0, &prev);
+}`,
+    cases: [
+      { name: "合法 BST", stdin: "10\n40 25 60 -1 30 -1 80 -1 -1 27\n" },
+      { name: "非法 BST", stdin: "11\n40 50 60 -1 30 -1 -1 -1 -1 -1 35\n" },
+      { name: "单结点", stdin: "1\n50\n" },
+      { name: "空树", stdin: "0\n" },
+      { name: "右斜", stdin: "3\n10 20 30\n" },
+    ],
+  },
+
+  "综合 5.4-06": {
+    title: "由层次序列和各结点度数构造孩子兄弟链表",
+    sig: "void CreateCSTree(CSNode **T, char e[], int degree[], int n)",
+    ret: "无返回值。通过 *T 返回建好的孩子兄弟链表的根结点。",
+    vars: [
+      "e：树的层次遍历序列，e[0] 是根，按层次从前往后给出。",
+      "degree：每个结点的度，与 e 一一对应。",
+      "pointer：按层次序先建好 n 个孤立结点，再按度数把子女依次挂成 firstchild + nextsibling 链。",
+      "k：按层次序推进的子女结点下标，每分配一个子女就加 1。",
+    ],
+    io: "第一行 n；第二行 n 个字符（层次序列）；第三行 n 个整数（各结点度数）；输出孩子兄弟表示下的先序序列（结点后跟一个空格）。",
+    pre: CST_PRE,
+    post: `static void preCS(CSNode *t) {
+    if (t == NULL) return;
+    printf("%c ", t->data);
+    preCS(t->firstchild);
+    preCS(t->nextsibling);
+}
+
+int main(void) {
+    char e[64];
+    int degree[64];
+    int n = 0, i;
+    CSNode *T = NULL;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > 64) n = 64;
+    for (i = 0; i < n; ++i) {
+        if (scanf(" %c", &e[i]) != 1) return 0;
+    }
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &degree[i]) != 1) return 0;
+    }
+    CreateCSTree(&T, e, degree, n);
+    preCS(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void CreateCSTree(CSNode **T, char e[], int degree[], int n) {
+    CSNode *pointer[128];
+    int i, j, k = 0, d;
+    for (i = 0; i < n; ++i) {
+        pointer[i] = (CSNode *)malloc(sizeof(CSNode));
+        pointer[i]->data = e[i];
+        pointer[i]->firstchild = NULL;
+        pointer[i]->nextsibling = NULL;
+    }
+    for (i = 0; i < n; ++i) {
+        d = degree[i];
+        if (d > 0) {
+            ++k;
+            pointer[i]->firstchild = pointer[k];
+            for (j = 2; j <= d; ++j) {
+                ++k;
+                pointer[k - 1]->nextsibling = pointer[k];
+            }
+        }
+    }
+    *T = n > 0 ? pointer[0] : NULL;
+}`,
+    cases: [
+      { name: "三层树", stdin: "9\nABCDEFGHI\n3 2 0 0 0 2 0 0 0\n" },
+      { name: "单结点", stdin: "1\nA\n0\n" },
+      { name: "链状", stdin: "3\nABC\n1 1 0\n" },
+      { name: "根三子女", stdin: "4\nABCD\n3 0 0 0\n" },
+    ],
+  },
+
+  "综合 5.3-18": {
+    title: "中序线索二叉树中求后序前驱",
+    sig: "BiThrTree PostPre(BiThrTree p)",
+    ret: "返回结点 p 在后序序列中的前驱结点指针；不存在时返回 NULL。",
+    vars: [
+      "p：中序线索二叉树中的某个结点，ltag = 1 表示 lchild 是前驱线索，rtag = 1 表示 rchild 是后继线索。",
+      "若 p 有右孩子（rtag == 0），右孩子就是它的后序前驱；只有左孩子时，左孩子是后序前驱。",
+      "两孩子都没有时，顺着左线索往上找祖先，取那个祖先的左孩子。",
+    ],
+    io: "第一行扩展先序序列（# 为空）；第二行一个结点值；输出该结点在后序下的前驱值，没有则输出 -1。",
+    pre: THR_PRE,
+    post: `static BiThrTree findThr(BiThrTree t, char c) {
+    BiThrTree r;
+    if (t == NULL) return NULL;
+    if (t->data == c) return t;
+    if (t->ltag == 0) {
+        r = findThr(t->lchild, c);
+        if (r != NULL) return r;
+    }
+    if (t->rtag == 0) {
+        r = findThr(t->rchild, c);
+        if (r != NULL) return r;
+    }
+    return NULL;
+}
+
+int main(void) {
+    BiThrTree T, p, q;
+    char c = 0;
+    T = BuildThrTree();
+    CreateInThread(T);
+    if (scanf(" %c", &c) != 1) return 0;
+    p = findThr(T, c);
+    if (p == NULL) {
+        printf("-1\\n");
+        return 0;
+    }
+    q = PostPre(p);
+    printf("%c\\n", q == NULL ? '-' : q->data);
+    return 0;
+}`,
+    std: `BiThrTree PostPre(BiThrTree p) {
+    BiThrTree q;
+    if (p->rtag == 0) {
+        q = p->rchild;
+    } else if (p->ltag == 0) {
+        q = p->lchild;
+    } else if (p->lchild == NULL) {
+        q = NULL;
+    } else {
+        while (p->ltag == 1 && p->lchild != NULL) p = p->lchild;
+        if (p->ltag == 0) q = p->lchild;
+        else q = NULL;
+    }
+    return q;
+}`,
+    cases: [
+      { name: "叶子结点", stdin: "ABD##E##C#F##\nD\n" },
+      { name: "有右孩子", stdin: "ABD##E##C#F##\nB\n" },
+      { name: "根结点", stdin: "ABD##E##C#F##\nA\n" },
+      { name: "左叶", stdin: "AB##C##\nB\n" },
+    ],
+  },
+
+  "综合 6.2-06": {
+    title: "判断无向图是否存在 EL 路径",
+    sig: "int IsExistEL(MGraph G)",
+    ret: "存在 EL 路径返回 1，否则返回 0。判据是度为奇数的顶点个数为 0 或 2。",
+    vars: [
+      "G.vexnum：顶点数，编号 1..vexnum；G.arcs[i][j] 为 0 表示无边（对角线恒为 0），INF 表示不连通。",
+      "degree：当前顶点 i 的度，等于与它相邻的顶点个数。",
+      "count：度为奇数的顶点个数，只可能是 0 或 2 时图才存在欧拉路径。",
+    ],
+    io: "第一行 n m（顶点数与边数），随后 m 行 `u v w` 给出无向边；输出 1 或 0。",
+    pre: MG_PRE,
+    post: `int main(void) {
+    MGraph G = BuildMG(0);
+    printf("%d\\n", IsExistEL(G));
+    return 0;
+}`,
+    std: `int IsExistEL(MGraph G) {
+    int i, j, deg, count = 0;
+    for (i = 1; i <= G.vexnum; ++i) {
+        deg = 0;
+        for (j = 1; j <= G.vexnum; ++j) {
+            if (i != j && G.arcs[i][j] != INF) ++deg;
+        }
+        if (deg % 2 == 1) ++count;
+    }
+    return (count == 0 || count == 2) ? 1 : 0;
+}`,
+    cases: [
+      { name: "三角形回路", stdin: "3 3\n1 2 1\n2 3 1\n3 1 1\n" },
+      { name: "一条链", stdin: "3 2\n1 2 1\n2 3 1\n" },
+      { name: "星形四边", stdin: "5 4\n1 2 1\n1 3 1\n1 4 1\n1 5 1\n" },
+      { name: "孤立顶点", stdin: "1 0\n" },
+    ],
+  },
+
+  "综合 6.3-04": {
+    title: "DFS 与 BFS 判断有向图两点间是否存在路径",
+    sig: "int DFSPath(ALGraph G, int i, int j) / int BFSPath(ALGraph G, int i, int j)",
+    ret: "存在从 i 到 j 的路径返回 1，否则返回 0；i 与 j 相同时视为存在（长度为 0 的路径）。",
+    vars: [
+      "G：邻接表存储的有向图，顶点编号 1..vexnum，firstarc 是第一条出边，nextarc 指向下一条。",
+      "visited：访问标记数组，两个函数各自独立，不能共用。",
+      "DFS 递归往下探，BFS 用数组当队列逐层扩展，二者都只沿出边方向走。",
+    ],
+    io: "第一行 n m（顶点数与弧数），随后 m 行 `u v` 给出有向边 u→v；最后一行两个顶点 i j；输出 `dfs=… bfs=…`。",
+    pre: AL_PRE,
+    post: `int main(void) {
+    ALGraph G = BuildALG(1);
+    int i = 0, j = 0;
+    if (scanf("%d %d", &i, &j) != 2) return 0;
+    printf("dfs=%d bfs=%d\\n", DFSPath(G, i, j), BFSPath(G, i, j));
+    return 0;
+}`,
+    std: `static int dfsReach(ALGraph *G, int u, int j, int *vis) {
+    ArcNode *p;
+    if (u == j) return 1;
+    vis[u] = 1;
+    for (p = G->vertices[u].firstarc; p != NULL; p = p->nextarc) {
+        if (!vis[p->adjvex] && dfsReach(G, p->adjvex, j, vis)) return 1;
+    }
+    return 0;
+}
+
+int DFSPath(ALGraph G, int i, int j) {
+    int vis[MAXV + 1];
+    int k;
+    for (k = 0; k <= G.vexnum; ++k) vis[k] = 0;
+    return dfsReach(&G, i, j, vis);
+}
+
+int BFSPath(ALGraph G, int i, int j) {
+    int vis[MAXV + 1], q[MAXV * 2], head = 0, tail = 0, u, k;
+    ArcNode *p;
+    for (k = 0; k <= G.vexnum; ++k) vis[k] = 0;
+    if (i == j) return 1;
+    vis[i] = 1;
+    q[tail++] = i;
+    while (head < tail) {
+        u = q[head++];
+        for (p = G.vertices[u].firstarc; p != NULL; p = p->nextarc) {
+            if (p->adjvex == j) return 1;
+            if (!vis[p->adjvex]) {
+                vis[p->adjvex] = 1;
+                q[tail++] = p->adjvex;
+            }
+        }
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "可达", stdin: "4 3\n1 2\n2 3\n3 4\n1 4\n" },
+      { name: "不可达", stdin: "3 2\n1 2\n2 3\n3 1\n" },
+      { name: "自身", stdin: "3 1\n1 2\n2 2\n" },
+      { name: "有环可达", stdin: "3 3\n1 2\n2 3\n3 2\n1 3\n" },
+    ],
+  },
+
+  "综合 6.3-05": {
+    title: "输出有向图两点之间的所有简单路径",
+    sig: "void FindPath(ALGraph *G, int u, int v, int path[], int d)",
+    ret: "无返回值。每找到一条简单路径就打印一行，顶点之间用空格分隔。",
+    vars: [
+      "u：当前所在顶点；v：目标顶点；d：当前路径长度，进入函数后先自增再写入 path[d]。",
+      "path：保存当前路径上的顶点序列；visited：已在本条路径上的顶点，回溯时要清 0。",
+      "G 走邻接表，头插法建表会让同一层的邻接点按倒序排列，输出顺序随之如此。",
+    ],
+    io: "第一行 n m，随后 m 行 `u v` 有向边；最后一行起点与终点；输出所有简单路径，每条一行。",
+    pre: AL_PRE,
+    post: `int visited[MAXV + 1];
+
+int main(void) {
+    ALGraph G = BuildALG(1);
+    int path[MAXV + 1];
+    int s = 0, t = 0, i;
+    if (scanf("%d %d", &s, &t) != 2) return 0;
+    for (i = 0; i <= G.vexnum; ++i) visited[i] = 0;
+    FindPath(&G, s, t, path, -1);
+    return 0;
+}`,
+    std: `extern int visited[];
+
+void FindPath(ALGraph *G, int u, int v, int path[], int d) {
+    int w, i;
+    ArcNode *p;
+    ++d;
+    path[d] = u;
+    visited[u] = 1;
+    if (u == v) {
+        for (i = 0; i <= d; ++i) printf("%d ", path[i]);
+        printf("\\n");
+    }
+    for (p = G->vertices[u].firstarc; p != NULL; p = p->nextarc) {
+        w = p->adjvex;
+        if (!visited[w]) FindPath(G, w, v, path, d);
+    }
+    visited[u] = 0;
+}`,
+    cases: [
+      { name: "两条路径", stdin: "4 4\n1 2\n1 3\n2 4\n3 4\n1 4\n" },
+      { name: "无路径", stdin: "3 2\n1 2\n2 3\n3 1\n" },
+      { name: "直达", stdin: "2 1\n1 2\n1 2\n" },
+      { name: "含环", stdin: "3 3\n1 2\n2 1\n2 3\n1 3\n" },
+    ],
+  },
+
+  "综合 2.2-09": {
+    title: "有序顺序表中查找 x 并交换或插入",
+    sig: "void SearchExchangeInsert(SqList *L, ElemType x)",
+    ret: "无返回值。找到 x 时把它与后继交换（x 已在最后一个位置就不动）；找不到时把 x 插入到保持递增有序的位置，L->length 加 1。",
+    vars: [
+      "low、high：折半查找的上下界，mid 为当前中点。",
+      "找到的判断是 A[mid] == x，退出循环后 low > high 说明没找到。",
+      "插入时把 high+1 及其后的元素整体后移一位，再把 x 放到 high+1 处。",
+    ],
+    io: "第一行 n，第二行 n 个递增整数，第三行 x；输出第一行新表长，第二行结果序列。",
+    pre: SQLIST_PRE,
+    post: `int main(void) {
+    SqList L;
+    int n = 0, i;
+    ElemType x = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXSIZE - 1) n = MAXSIZE - 1;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &L.data[i]) != 1) return 0;
+    }
+    L.length = n;
+    if (scanf("%d", &x) != 1) return 0;
+    SearchExchangeInsert(&L, x);
+${printSqList()}`,
+    std: `void SearchExchangeInsert(SqList *L, ElemType x) {
+    int low = 0, high = L->length - 1, mid = 0, i;
+    ElemType t;
+    while (low <= high) {
+        mid = (low + high) / 2;
+        if (L->data[mid] == x) break;
+        else if (L->data[mid] < x) low = mid + 1;
+        else high = mid - 1;
+    }
+    if (low <= high && mid != L->length - 1) {
+        t = L->data[mid];
+        L->data[mid] = L->data[mid + 1];
+        L->data[mid + 1] = t;
+    }
+    if (low > high) {
+        for (i = L->length - 1; i > high; --i) L->data[i + 1] = L->data[i];
+        L->data[high + 1] = x;
+        L->length++;
+    }
+}`,
+    cases: [
+      { name: "找到中间", stdin: "7\n1 3 5 7 9 11 13\n7\n" },
+      { name: "找到末尾", stdin: "5\n1 3 5 7 9\n9\n" },
+      { name: "找不到插中间", stdin: "6\n1 3 5 9 11 13\n7\n" },
+      { name: "插到表头", stdin: "4\n5 8 12 20\n2\n" },
+      { name: "空表插入", stdin: "0\n6\n" },
+    ],
+  },
+
+  "综合 2.2-14": {
+    title: "三个升序集合中三元组的最小距离",
+    sig: "int MinDistance(int A[], int n, int B[], int m, int C[], int p)",
+    ret: "返回所有三元组 (a,b,c) 中 |a-b| + |b-c| + |c-a| 的最小值。",
+    vars: [
+      "A、B、C：三个非空升序数组，长度分别是 n、m、p。",
+      "i、j、k：三个数组上的游标，每轮算出当前三元组的 D。",
+      "每轮把当前三个数中最小的那个指针前移一位，这样 D 只会越来越小，O(n+m+p) 就能收敛。",
+    ],
+    io: "第一行 n m p；随后三行分别是 A、B、C 的元素；输出最小距离。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int A[MAXN], B[MAXN], C[MAXN];
+    int n = 0, m = 0, p = 0, i;
+    if (scanf("%d %d %d", &n, &m, &p) != 3) return 0;
+    for (i = 0; i < n; ++i) if (scanf("%d", &A[i]) != 1) return 0;
+    for (i = 0; i < m; ++i) if (scanf("%d", &B[i]) != 1) return 0;
+    for (i = 0; i < p; ++i) if (scanf("%d", &C[i]) != 1) return 0;
+    printf("%d\\n", MinDistance(A, n, B, m, C, p));
+    return 0;
+}`,
+    std: `static int iabs(int a) { return a < 0 ? -a : a; }
+
+int MinDistance(int A[], int n, int B[], int m, int C[], int p) {
+    int i = 0, j = 0, k = 0, d, best = 2147483647;
+    while (i < n && j < m && k < p && best > 0) {
+        d = iabs(A[i] - B[j]) + iabs(B[j] - C[k]) + iabs(C[k] - A[i]);
+        if (d < best) best = d;
+        if (A[i] <= B[j] && A[i] <= C[k]) ++i;
+        else if (B[j] <= C[k] && B[j] <= A[i]) ++j;
+        else ++k;
+    }
+    return best;
+}`,
+    cases: [
+      { name: "教材样例", stdin: "3 4 5\n-1 0 9\n-25 -10 10 11\n2 9 17 30 41\n" },
+      { name: "有公共值", stdin: "3 3 3\n1 5 9\n5 8 12\n4 5 20\n" },
+      { name: "各一个", stdin: "1 1 1\n1\n10\n5\n" },
+      { name: "全相同", stdin: "2 2 2\n7 7\n7 7\n7 7\n" },
+    ],
+  },
+
+  "综合 2.3-23": {
+    title: "求两个单词链表共同后缀的起始位置",
+    sig: "LNode *FindSuffix(LNode *str1, LNode *str2)",
+    ret: "返回共同后缀第一个字符所在结点的指针；没有共同后缀返回 NULL。",
+    vars: [
+      "str1、str2：两个带头结点的字符单链表，头结点的 data 无意义，字符从 next 开始。",
+      "两表长度可能不同，先让长表指针走掉长度差，再同步后移找第一个相同结点。",
+      "时间复杂度 O(m+n)，只用了常数个指针。",
+    ],
+    io: "输入三行：str1 的前缀部分、str2 的前缀部分、共同后缀（三行都不含空格，可以为空行）。三行拼起来构成两个完整单词。输出共同后缀第一个字符，不存在输出 -1。",
+    pre: CLIST_CHAR_PRE,
+    post: `static void appendStr(LinkList head, const char *s) {
+    LNode *tail = head, *t;
+    int i;
+    for (i = 0; s[i] != '\\0'; ++i) {
+        t = (LNode *)malloc(sizeof(LNode));
+        t->data = s[i];
+        t->next = NULL;
+        tail->next = t;
+        tail = t;
+    }
+}
+
+int main(void) {
+    char p1[128], p2[128], suf[128];
+    LinkList s1, s2;
+    LNode *r;
+    if (scanf("%127s", p1) != 1) return 0;
+    if (scanf("%127s", p2) != 1) return 0;
+    if (scanf("%127s", suf) != 1) return 0;
+    s1 = (LinkList)malloc(sizeof(LNode));
+    s1->data = 0;
+    s1->next = NULL;
+    s2 = (LinkList)malloc(sizeof(LNode));
+    s2->data = 0;
+    s2->next = NULL;
+    appendStr(s1, p1);
+    appendStr(s2, p2);
+    if (suf[0] != '-') {
+        LNode *a = s1, *b = s2, *first = NULL, *last = NULL, *t;
+        int i;
+        while (a->next != NULL) a = a->next;
+        while (b->next != NULL) b = b->next;
+        for (i = 0; suf[i] != '\\0'; ++i) {
+            t = (LNode *)malloc(sizeof(LNode));
+            t->data = suf[i];
+            t->next = NULL;
+            if (first == NULL) first = t;
+            else last->next = t;
+            last = t;
+        }
+        a->next = first;
+        b->next = first;
+    }
+    r = FindSuffix(s1, s2);
+    printf("%c\\n", r == NULL ? '-' : r->data);
+    return 0;
+}`,
+    std: `static int strLen(LNode *h) {
+    int n = 0;
+    LNode *p = h->next;
+    while (p != NULL) {
+        ++n;
+        p = p->next;
+    }
+    return n;
+}
+
+LNode *FindSuffix(LNode *str1, LNode *str2) {
+    int m = strLen(str1), n = strLen(str2);
+    LNode *p = str1->next, *q = str2->next;
+    for (; m > n; --m) p = p->next;
+    for (; n > m; --n) q = q->next;
+    while (p != NULL && q != NULL && p != q) {
+        p = p->next;
+        q = q->next;
+    }
+    return p;
+}`,
+    cases: [
+      { name: "loading / being", stdin: "load\nbe\ning\n" },
+      { name: "无共享", stdin: "abc\nxyz\n-\n" },
+      { name: "整串相同", stdin: "-\n-\nabc\n" },
+      { name: "只剩一个字符", stdin: "ab\nabc\na\n" },
+    ],
+  },
+
+  "综合 2.3-20": {
+    title: "按访问频度调整的双向链表 Locate",
+    sig: "DNode *Locate(DLinkList L, ElemType x)",
+    ret: "找到值为 x 的结点后把它频度加 1，并按频度非增（相同频度时最近访问的靠前）重新定位，最后返回该结点指针；找不到返回 NULL。",
+    vars: [
+      "L：带头结点的双向循环链表，结点含 prior、data、next、freq 四个域，freq 初值为 0。",
+      "p：工作指针，沿着 next 找 x。",
+      "q：从 p 的前驱往前找插入位置，条件 q->freq <= p->freq 时继续前移，停下后 p 插到 q 后面。",
+    ],
+    io: "第一行 n，第二行 n 个整数建表；第三行 m，第四行 m 个查询值；每次查询输出一行结果，最后一行输出整表（值:频度）。",
+    pre: DLIST_FREQ_PRE,
+    post: `int main(void) {
+    DLinkList L;
+    DNode *t, *tail, *p;
+    int n = 0, i, v, m = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    L = (DLinkList)malloc(sizeof(DNode));
+    L->data = 0;
+    L->freq = 0;
+    L->prior = L;
+    L->next = L;
+    tail = L;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        t = (DNode *)malloc(sizeof(DNode));
+        t->data = v;
+        t->freq = 0;
+        t->prior = tail;
+        t->next = L;
+        tail->next = t;
+        L->prior = t;
+        tail = t;
+    }
+    if (scanf("%d", &m) != 1) return 0;
+    for (i = 0; i < m; ++i) {
+        if (scanf("%d", &v) != 1) return 0;
+        p = Locate(L, v);
+        if (p == NULL) printf("query %d -> MISS\\n", v);
+        else printf("query %d -> %d\\n", v, p->data);
+    }
+    printf("list:");
+    for (p = L->next; p != L; p = p->next) printf(" %d:%d", p->data, p->freq);
+    printf("\\n");
+    return 0;
+}`,
+    std: `DNode *Locate(DLinkList L, ElemType x) {
+    DNode *p = L->next, *q;
+    while (p != L && p->data != x) p = p->next;
+    if (p == L) return NULL;
+    p->freq++;
+    if (p->prior == L) return p;
+    if (p->prior->freq > p->freq) return p;
+    q = p->prior;
+    while (q != L && q->freq <= p->freq) q = q->prior;
+    p->prior->next = p->next;
+    p->next->prior = p->prior;
+    p->next = q->next;
+    p->next->prior = p;
+    p->prior = q;
+    q->next = p;
+    return p;
+}`,
+    cases: [
+      { name: "一次访问", stdin: "4\n1 2 3 4\n1\n3\n" },
+      { name: "多次访问", stdin: "4\n1 2 3 4\n3\n3 4 3\n" },
+      { name: "访问表头", stdin: "3\n5 6 7\n2\n5 5\n" },
+      { name: "访问不存在", stdin: "3\n1 2 3\n2\n9 1\n" },
+    ],
+  },
+
+  "综合 3.3-04": {
+    title: "汽车轮渡口调度模拟",
+    sig: "void manager(int n1, int n2)",
+    ret: "无返回值。按调度规则把车依次放上渡船，直接打印每辆车的编号，一行最多 10 辆。",
+    vars: [
+      "n1：等待的客车数，编号依次是 C1、C2、……；n2：等待的货车数，编号依次是 F1、F2、……。",
+      "i：当前已经连续上船的客车数；j：渡船上已有的车辆总数，上限 10。",
+      "规则是每上 4 辆客车才放 1 辆货车；客车不足 4 辆时用货车顶替，某一类车空了就把另一类车全部放上去。",
+    ],
+    io: "输入一行 `n1 n2`；输出上船顺序，每辆车后跟一个空格，最多 10 辆。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int n1 = 0, n2 = 0;
+    if (scanf("%d %d", &n1, &n2) != 2) return 0;
+    manager(n1, n2);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void manager(int n1, int n2) {
+    int c = 1, f = 1, i = 0, j = 0;
+    while (j < 10) {
+        if (c <= n1 && i < 4) {
+            printf("C%d ", c);
+            ++c;
+            ++i;
+            ++j;
+        } else if (i >= 4 && f <= n2) {
+            printf("F%d ", f);
+            ++f;
+            i = 0;
+            ++j;
+        } else if (f <= n2) {
+            printf("F%d ", f);
+            ++f;
+            ++i;
+            if (i >= 4) i = 0;
+            ++j;
+        } else if (c <= n1) {
+            printf("C%d ", c);
+            ++c;
+            ++i;
+            ++j;
+        } else {
+            break;
+        }
+    }
+}`,
+    cases: [
+      { name: "客车 6 货车 5", stdin: "6 5\n" },
+      { name: "客车 2 货车 8", stdin: "2 8\n" },
+      { name: "全是客车", stdin: "12 0\n" },
+      { name: "全是货车", stdin: "0 3\n" },
+      { name: "各 1 辆", stdin: "1 1\n" },
+    ],
+  },
+
+  "综合 7.2-02": {
+    title: "折半查找的比较过程",
+    sig: "int BinSearchTrace(int A[], int n, int x, int trace[], int *cmp)",
+    ret: "查找成功返回 x 在表中的下标，失败返回 -1；trace 依次保存被比较过的元素，*cmp 写入比较次数。",
+    vars: [
+      "A：递增有序的顺序表，n 为表长。",
+      "low、high、mid：折半查找的三个下标，每次取 mid = (low+high)/2。",
+      "判定树就是由这些 mid 依次构成的，比较次数等于结点在判定树中的层数。",
+    ],
+    io: "第一行 n，第二行 n 个递增整数，第三行 m，第四行 m 个待查值；每个查询输出一行：比较过的元素序列，然后 `-> 下标` 或 `-> -1`。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int A[MAXN], n = 0, m = 0, i, pos, cmp, k, trace[64];
+    if (scanf("%d", &n) != 1) return 0;
+    for (i = 0; i < n; ++i) if (scanf("%d", &A[i]) != 1) return 0;
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        int x = 0;
+        if (scanf("%d", &x) != 1) return 0;
+        pos = BinSearchTrace(A, n, x, trace, &cmp);
+        for (i = 0; i < cmp; ++i) printf("%d ", trace[i]);
+        printf("-> %d\\n", pos);
+    }
+    return 0;
+}`,
+    std: `int BinSearchTrace(int A[], int n, int x, int trace[], int *cmp) {
+    int low = 0, high = n - 1, mid, cnt = 0, pos = -1;
+    while (low <= high) {
+        mid = (low + high) / 2;
+        trace[cnt++] = A[mid];
+        if (A[mid] == x) {
+            pos = mid;
+            break;
+        } else if (A[mid] < x) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    *cmp = cnt;
+    return pos;
+}`,
+    cases: [
+      { name: "教材表查 275 与 684", stdin: "14\n17 94 154 170 275 503 509 512 553 612 677 765 897 908\n2\n275 684\n" },
+      { name: "查表头表尾", stdin: "14\n17 94 154 170 275 503 509 512 553 612 677 765 897 908\n2\n17 908\n" },
+      { name: "单元素命中", stdin: "1\n50\n1\n50\n" },
+      { name: "单元素失败", stdin: "1\n50\n1\n10\n" },
+    ],
+  },
+
+  "综合 7.2-04": {
+    title: "先按 8 一组顺序查块，再在块内折半",
+    sig: "int BlockSearch(int A[], int n, int x)",
+    ret: "找到返回元素下标，找不到返回 -1。",
+    vars: [
+      "A：递增有序的顺序表，长度 n，元素下标 0..n-1。",
+      "先查 A[7]、A[15]、A[23]…… 这些块尾，确定 x 落在哪一块。",
+      "确定块后在该块内（不含块尾）做折半查找；x 大于最后一个块尾则直接失败。",
+    ],
+    io: "第一行 n，第二行 n 个递增整数，第三行 m，第四行 m 个待查值；每个查询输出一行下标或 -1。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int A[MAXN], n = 0, m = 0, i, k, x;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 0; i < n; ++i) if (scanf("%d", &A[i]) != 1) return 0;
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &x) != 1) return 0;
+        printf("%d\\n", BlockSearch(A, n, x));
+    }
+    return 0;
+}`,
+    std: `int BlockSearch(int A[], int n, int x) {
+    int k = 7, low, high, mid;
+    while (k < n && A[k] < x) k += 8;
+    if (k >= n) {
+        if (n - 1 >= 0 && A[n - 1] == x) return n - 1;
+        k = n - 1;
+    }
+    if (k < n && A[k] == x) return k;
+    low = k - 7;
+    high = k - 1;
+    if (low < 0) low = 0;
+    while (low <= high) {
+        mid = (low + high) / 2;
+        if (A[mid] == x) return mid;
+        else if (A[mid] < x) low = mid + 1;
+        else high = mid - 1;
+    }
+    return -1;
+}`,
+    cases: [
+      { name: "块尾命中", stdin: "24\n1 2 3 4 5 6 7 100 9 10 11 12 13 14 15 200 17 18 19 20 21 22 23 300\n3\n100 200 300\n" },
+      { name: "块内命中", stdin: "17\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 99\n2\n5 99\n" },
+      { name: "不存在", stdin: "9\n11 22 33 44 55 66 77 88 999\n2\n50 1000\n" },
+      { name: "第一个元素", stdin: "8\n1 2 3 4 5 6 7 8\n1\n1\n" },
+    ],
+  },
+
+  "综合 7.2-06": {
+    title: "顺序查找并把命中的元素与前驱交换",
+    sig: "int SeqSearchSwap(int A[], int n, int x)",
+    ret: "找到时返回交换之后 x 所在的下标；x 已在表头时下标仍为 0 并不再交换；找不到返回 -1，表不变。",
+    vars: [
+      "A：顺序存储的线性表，n 为表长。",
+      "i：从前向后扫描的下标，找到后把 A[i] 与 A[i-1] 交换。",
+      "这样频繁被查的元素会逐步前移，平均查找长度随之下降。",
+    ],
+    io: "第一行 n，第二行 n 个整数，第三行 m，第四行 m 个待查值；每次查询输出一行，先是返回的下标，然后是当前的整张表。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int A[MAXN], n = 0, m = 0, i, k, x, pos;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 0; i < n; ++i) if (scanf("%d", &A[i]) != 1) return 0;
+    if (scanf("%d", &m) != 1) return 0;
+    for (k = 0; k < m; ++k) {
+        if (scanf("%d", &x) != 1) return 0;
+        pos = SeqSearchSwap(A, n, x);
+        printf("%d |", pos);
+        for (i = 0; i < n; ++i) printf(" %d", A[i]);
+        printf("\\n");
+    }
+    return 0;
+}`,
+    std: `int SeqSearchSwap(int A[], int n, int x) {
+    int i = 0, t;
+    while (i < n && A[i] != x) ++i;
+    if (i >= n) return -1;
+    if (i > 0) {
+        t = A[i];
+        A[i] = A[i - 1];
+        A[i - 1] = t;
+        return i - 1;
+    }
+    return 0;
+}`,
+    cases: [
+      { name: "连续查同一个", stdin: "6\n10 20 30 40 50 60\n3\n50 50 50\n" },
+      { name: "查表头", stdin: "4\n1 2 3 4\n2\n1 1\n" },
+      { name: "查不到", stdin: "5\n2 4 6 8 10\n2\n99 8\n" },
+      { name: "查表尾", stdin: "4\n5 6 7 8\n1\n8\n" },
+    ],
+  },
+
+  "综合 7.3-01": {
+    title: "由先序序列建立二叉排序树",
+    sig: "BSTree BuildFromPreOrder(int pre[], int n)",
+    ret: "返回建好的二叉排序树根指针；n 为 0 时返回 NULL。",
+    vars: [
+      "pre：二叉排序树的先序序列。",
+      "二叉排序树的先序序列可以唯一确定这棵树：第一个元素是根，后面按大小关系分成左右两段。",
+      "也可以按序列顺序逐个插入，插出来的树与先序序列完全对应。",
+    ],
+    io: "第一行 n，第二行 n 个整数（先序序列）；输出两行：中序序列、ASL 成功与失败（保留两位小数）。",
+    pre: BST_PRE,
+    post: `static void inOrder(BSTree T) {
+    if (T == NULL) return;
+    inOrder(T->lchild);
+    printf("%d ", T->key);
+    inOrder(T->rchild);
+}
+
+static void depthSum(BSTree T, int d, int *sum) {
+    if (T == NULL) return;
+    *sum += d;
+    depthSum(T->lchild, d + 1, sum);
+    depthSum(T->rchild, d + 1, sum);
+}
+
+static void failSum(BSTree T, int d, int *sum) {
+    if (T == NULL) {
+        *sum += d;
+        return;
+    }
+    failSum(T->lchild, d + 1, sum);
+    failSum(T->rchild, d + 1, sum);
+}
+
+static int nodes(BSTree T) {
+    if (T == NULL) return 0;
+    return 1 + nodes(T->lchild) + nodes(T->rchild);
+}
+
+int main(void) {
+    int pre[128], n = 0, i, s1 = 0, s2 = 0;
+    BSTree T;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > 128) n = 128;
+    for (i = 0; i < n; ++i) if (scanf("%d", &pre[i]) != 1) return 0;
+    T = BuildFromPreOrder(pre, n);
+    inOrder(T);
+    printf("\\n");
+    depthSum(T, 1, &s1);
+    failSum(T, 1, &s2);
+    printf("ASL succ %.2f fail %.2f\\n", n ? (double)s1 / n : 0.0, (double)s2 / (nodes(T) + 1));
+    return 0;
+}`,
+    std: `BSTree BuildFromPreOrder(int pre[], int n) {
+    int i;
+    BSTree T = NULL;
+    for (i = 0; i < n; ++i) T = BSTInsert(T, pre[i]);
+    return T;
+}`,
+    cases: [
+      { name: "教材序列", stdin: "10\n50 38 30 45 40 48 70 60 75 80\n" },
+      { name: "单结点", stdin: "1\n42\n" },
+      { name: "左斜", stdin: "4\n40 30 20 10\n" },
+      { name: "空树", stdin: "0\n" },
+    ],
+  },
+
+  "综合 7.3-11": {
+    title: "带 count 域的二叉排序树中找第 k 小",
+    sig: "BSTNode *Search_Small(BSTNode *t, int k)",
+    ret: "返回第 k 小元素所在结点指针；k 超出 1..count 范围时返回 NULL。",
+    vars: [
+      "t->count：以 t 为根的子树结点总数，由 BuildCountBST 建树时算好。",
+      "左子树结点数 lc 就是比 t 小的元素个数：k <= lc 往左找，k == lc+1 就是 t 自己，否则往右找第 k-lc-1 小。",
+      "每层只走一边，平均复杂度 O(log n)。",
+    ],
+    io: "第一行 n，第二行 n 个待插入的关键字，第三行 k；输出第 k 小的值，越界输出 -1。",
+    pre: BSTC_PRE,
+    post: `int main(void) {
+    BSTNode *T, *p;
+    int n = 0, k = 0;
+    if (scanf("%d", &n) != 1) return 0;
+    T = BuildCountBST(n);
+    if (scanf("%d", &k) != 1) return 0;
+    p = Search_Small(T, k);
+    printf("%d\\n", p == NULL ? -1 : p->key);
+    return 0;
+}`,
+    std: `BSTNode *Search_Small(BSTNode *t, int k) {
+    int lc;
+    if (t == NULL) return NULL;
+    if (k < 1 || k > t->count) return NULL;
+    lc = (t->lchild != NULL) ? t->lchild->count : 0;
+    if (k <= lc) return Search_Small(t->lchild, k);
+    if (k == lc + 1) return t;
+    return Search_Small(t->rchild, k - lc - 1);
+}`,
+    cases: [
+      { name: "第 1 小", stdin: "7\n50 30 70 20 40 60 80\n1\n" },
+      { name: "中间", stdin: "7\n50 30 70 20 40 60 80\n4\n" },
+      { name: "最大", stdin: "7\n50 30 70 20 40 60 80\n7\n" },
+      { name: "越界", stdin: "3\n5 3 8\n9\n" },
+      { name: "链状树", stdin: "5\n10 20 30 40 50\n3\n" },
+    ],
+  },
+
+  "综合 7.5-03": {
+    title: "线性探测法构造散列表并统计查找长度",
+    sig: "int LinearInsert(int HT[], int m, int key)",
+    ret: "把 key 插入散列表 HT，返回插入这个元素时的探测次数（也就是它的查找成功长度）。",
+    vars: [
+      "HT：长度为 m 的散列表，空位用 -1 表示。",
+      "m：表长，散列函数是 H(key) = key % m。",
+      "h：当前探测到的下标，冲突时 h = (h+1) % m 往后挪一格。",
+      "cnt：探测次数，从 1 起计。",
+    ],
+    io: "第一行 m n（表长与关键字个数），第二行 n 个关键字；输出第一行散列表内容，第二行 `ASL succ 总探测次数/n`。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int HT[64], m = 0, n = 0, i, key, total = 0;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+    if (m > 64) m = 64;
+    for (i = 0; i < m; ++i) HT[i] = -1;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &key) != 1) return 0;
+        total += LinearInsert(HT, m, key);
+    }
+    for (i = 0; i < m; ++i) printf("%d ", HT[i]);
+    printf("\\nASL succ %d/%d\\n", total, n);
+    return 0;
+}`,
+    std: `int LinearInsert(int HT[], int m, int key) {
+    int h = key % m, cnt = 1;
+    while (HT[h] != -1) {
+        h = (h + 1) % m;
+        ++cnt;
+    }
+    HT[h] = key;
+    return cnt;
+}`,
+    cases: [
+      { name: "教材八个数", stdin: "11 8\n1 13 12 34 38 33 27 22\n" },
+      { name: "无冲突", stdin: "11 4\n0 1 2 3\n" },
+      { name: "全冲突", stdin: "7 4\n7 14 21 28\n" },
+      { name: "单个", stdin: "5 1\n9\n" },
+    ],
+  },
+
+  "综合 7.5-04": {
+    title: "链地址法散列表的查找长度",
+    sig: "int ChainInsert(HNode *HT[], int p, int key)",
+    ret: "把 key 尾插到它所在的链上，返回这个 key 在该链中的位置（从 1 数起），即查找成功时的比较次数。",
+    vars: [
+      "HT：长度为 p 的指针数组，每个元素是单链表头指针。",
+      "p：散列函数 H(key) = key % p 中的模数。",
+      "同一链上的元素按插入先后排列，位置越靠后查找越长。",
+    ],
+    io: "第一行 p n，第二行 n 个关键字；输出 p 行，每行是 `下标: 链上元素`，最后一行 `ASL succ 总次数/n`。",
+    pre: HASH_CHAIN_PRE,
+    post: `int main(void) {
+    HNode *HT[64];
+    int p = 0, n = 0, i, key, total = 0;
+    if (scanf("%d %d", &p, &n) != 2) return 0;
+    if (p > 64) p = 64;
+    for (i = 0; i < p; ++i) HT[i] = NULL;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &key) != 1) return 0;
+        total += ChainInsert(HT, p, key);
+    }
+    for (i = 0; i < p; ++i) {
+        HNode *t;
+        printf("%d:", i);
+        for (t = HT[i]; t != NULL; t = t->next) printf(" %d", t->key);
+        printf("\\n");
+    }
+    printf("ASL succ %d/%d\\n", total, n);
+    return 0;
+}`,
+    std: `int ChainInsert(HNode *HT[], int p, int key) {
+    int h = key % p, cnt = 1;
+    HNode *q = (HNode *)malloc(sizeof(HNode));
+    HNode *t;
+    q->key = key;
+    q->next = NULL;
+    if (HT[h] == NULL) {
+        HT[h] = q;
+        return 1;
+    }
+    t = HT[h];
+    while (t->next != NULL) {
+        t = t->next;
+        ++cnt;
+    }
+    t->next = q;
+    return cnt + 1;
+}`,
+    cases: [
+      { name: "教材十一个数", stdin: "13 11\n26 36 41 38 44 15 68 12 6 51 25\n" },
+      { name: "无冲突", stdin: "7 3\n1 2 3\n" },
+      { name: "全冲突", stdin: "5 5\n5 10 15 20 25\n" },
+      { name: "单个", stdin: "3 1\n11\n" },
+    ],
+  },
+
+  "综合 7.5-05": {
+    title: "双散列法构造散列表",
+    sig: "int DoubleInsert(int HT[], int m, int key)",
+    ret: "按题给的再散列函数插入 key，返回这次插入的探测次数。",
+    vars: [
+      "HT：长度 m 的散列表，空位为 -1。",
+      "H0(key) = key % m；第 i 次的增量是 REV(key+1) % 11 + 1。",
+      "REV(x) 颠倒十进制各位，骨架里已给出，例如 REV(37)=73、REV(7)=7。",
+    ],
+    io: "第一行 m n，第二行 n 个关键码；输出第一行散列表内容，第二行 `ASL succ 总次数/n`。",
+    pre: DOUBLE_HASH_PRE,
+    post: `int main(void) {
+    int HT[64], m = 0, n = 0, i, key, total = 0;
+    if (scanf("%d %d", &m, &n) != 2) return 0;
+    if (m > 64) m = 64;
+    for (i = 0; i < m; ++i) HT[i] = -1;
+    for (i = 0; i < n; ++i) {
+        if (scanf("%d", &key) != 1) return 0;
+        total += DoubleInsert(HT, m, key);
+    }
+    for (i = 0; i < m; ++i) printf("%d ", HT[i]);
+    printf("\\nASL succ %d/%d\\n", total, n);
+    return 0;
+}`,
+    std: `int DoubleInsert(int HT[], int m, int key) {
+    int h = key % m, cnt = 1, d = REV(key + 1) % 11 + 1;
+    while (HT[h] != -1) {
+        h = (h + d) % m;
+        ++cnt;
+        if (cnt > m) break;
+    }
+    HT[h] = key;
+    return cnt;
+}`,
+    cases: [
+      { name: "教材八个数", stdin: "13 8\n2 8 31 20 19 18 53 27\n" },
+      { name: "无冲突", stdin: "13 3\n1 2 3\n" },
+      { name: "两两冲突", stdin: "7 6\n1 8 15 22 29 36\n" },
+      { name: "单个", stdin: "13 1\n20\n" },
+    ],
+  },
+
+  "综合 8.3-04": {
+    title: "随机选择枢轴的快速排序划分",
+    sig: "int Partition2(ElemType A[], int low, int high)",
+    ret: "返回枢轴元素最终所在的下标。划分完成后 A[low..i-1] 都小于枢轴值，A[i+1..high] 都不小于枢轴值。",
+    vars: [
+      "A：待划分的子表；low、high：子表下界与上界。",
+      "rand_Index：在 [low, high] 上随机取一个下标，把它交换到 A[low] 作为枢轴。",
+      "i：小于枢轴区间的右边界，初始为 low；j 从 low+1 扫到 high，遇到小于枢轴的数就换到前面。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出 `pos=pivot=…` 与划分后的数组。种子已在 main 里固定为 srand(20261127)，同样写法每次都得到同样的划分。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int A[MAXN], n = 0, i, pos;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 0; i < n; ++i) if (scanf("%d", &A[i]) != 1) return 0;
+    srand(20261127);
+    if (n > 0) {
+        pos = Partition2(A, 0, n - 1);
+        printf("pos=%d pivot=%d:", pos, A[pos]);
+        for (i = 0; i < n; ++i) printf(" %d", A[i]);
+    } else {
+        printf("pos=-1 pivot=0:");
+    }
+    printf("\\n");
+    return 0;
+}`,
+    std: `static void swapElem(ElemType *a, ElemType *b) {
+    ElemType t = *a;
+    *a = *b;
+    *b = t;
+}
+
+int Partition2(ElemType A[], int low, int high) {
+    int rand_Index = low + rand() % (high - low + 1);
+    int i = low, j;
+    ElemType pivot;
+    swapElem(&A[rand_Index], &A[low]);
+    pivot = A[low];
+    for (j = low + 1; j <= high; ++j) {
+        if (A[j] < pivot) {
+            ++i;
+            swapElem(&A[i], &A[j]);
+        }
+    }
+    swapElem(&A[i], &A[low]);
+    return i;
+}`,
+    cases: [
+      { name: "乱序", stdin: "8\n49 38 65 97 76 13 27 49\n" },
+      { name: "已有序", stdin: "6\n10 20 30 40 50 60\n" },
+      { name: "单元素", stdin: "1\n7\n" },
+      { name: "全相同", stdin: "5\n4 4 4 4 4\n" },
+    ],
+  },
+
+  "综合 8.3-07": {
+    title: "把集合划分成元素个数差最小、和差最大的两部分",
+    sig: "int setPartition(int a[], int n)",
+    ret: "返回 |S1 - S2| 的最大值，也就是 S2 的元素和减去 S1 的元素和。",
+    vars: [
+      "a：n 个正整数组成的集合，n >= 2。",
+      "k = n/2：较小那一半分到的元素个数。",
+      "先做一次快排式的划分，让前 k 个元素就是最小的 k 个；只有枢轴落在 k-1 位置时才算划分到位，否则只在那一侧继续。",
+      "S1 是前 k 个元素之和，S2 是其余元素之和，两者个数差固定为 0（n 偶数）或 1（n 奇数），此时和差最大。",
+    ],
+    io: "第一行 n，第二行 n 个正整数；输出第一行返回值，第二行前 k 个元素，第三行其余元素。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int a[MAXN], n = 0, i, k, r;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 0; i < n; ++i) if (scanf("%d", &a[i]) != 1) return 0;
+    r = setPartition(a, n);
+    k = n / 2;
+    printf("%d\\n", r);
+    for (i = 0; i < k; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    for (i = k; i < n; ++i) printf("%d ", a[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `static void swapI(int *x, int *y) {
+    int t = *x;
+    *x = *y;
+    *y = t;
+}
+
+int setPartition(int a[], int n) {
+    int pivotkey, low = 0, low0 = 0, high = n - 1, high0 = n - 1, k = n / 2, flag = 1, i, s1 = 0, s2 = 0;
+    while (flag) {
+        pivotkey = a[low];
+        while (low < high) {
+            while (low < high && a[high] >= pivotkey) --high;
+            if (low != high) a[low] = a[high];
+            while (low < high && a[low] <= pivotkey) ++low;
+            if (low != high) a[high] = a[low];
+        }
+        a[low] = pivotkey;
+        if (low == k - 1) flag = 0;
+        else if (low < k - 1) {
+            low0 = ++low;
+            high = high0;
+        } else {
+            high0 = --high;
+            low = low0;
+        }
+    }
+    for (i = 0; i < k; ++i) s1 += a[i];
+    for (i = k; i < n; ++i) s2 += a[i];
+    return s2 - s1;
+}`,
+    cases: [
+      { name: "教材示例", stdin: "8\n1 2 3 4 5 6 7 8\n" },
+      { name: "乱序", stdin: "6\n13 2 9 4 20 7\n" },
+      { name: "两个元素", stdin: "2\n5 1\n" },
+      { name: "奇数个", stdin: "7\n9 8 7 6 5 4 3\n" },
+    ],
+  },
+
+  "综合 8.6-05": {
+    title: "计数式比较排序（稳定版）",
+    sig: "void cmpCountSort(int a[], int b[], int n)",
+    ret: "无返回值。把 a 中 n 个元素按非降序写入 b，相同元素保持原有先后次序（稳定）。",
+    vars: [
+      "a：待排序数组；b：输出数组，长度与 a 相同。",
+      "count[i]：比 a[i] 大的元素个数（相等时按 a[i] <= a[j] 让后面的 count 加 1），所以 a[i] 的最终位置就是 count[i]。",
+      "比较次数固定为 n(n-1)/2，与数据初态无关。",
+    ],
+    io: "第一行 n，第二行 n 个整数；输出排序后的序列。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int a[MAXN], b[MAXN], n = 0, i;
+    if (scanf("%d", &n) != 1) return 0;
+    if (n > MAXN) n = MAXN;
+    for (i = 0; i < n; ++i) if (scanf("%d", &a[i]) != 1) return 0;
+    cmpCountSort(a, b, n);
+    for (i = 0; i < n; ++i) printf("%d ", b[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void cmpCountSort(int a[], int b[], int n) {
+    int i, j, *count;
+    count = (int *)malloc(sizeof(int) * (n > 0 ? n : 1));
+    for (i = 0; i < n; ++i) count[i] = 0;
+    for (i = 0; i < n - 1; ++i) {
+        for (j = i + 1; j < n; ++j) {
+            if (a[i] < a[j]) ++count[j];
+            else ++count[i];
+        }
+    }
+    for (i = 0; i < n; ++i) b[count[i]] = a[i];
+    free(count);
+}`,
+    cases: [
+      { name: "教材数组", stdin: "6\n25 -10 25 10 11 19\n" },
+      { name: "有重复", stdin: "7\n3 1 3 2 1 3 2\n" },
+      { name: "已逆序", stdin: "5\n9 7 5 3 1\n" },
+      { name: "单元素", stdin: "1\n8\n" },
+    ],
+  },
+
+  "综合 8.7-05": {
+    title: "k 路归并的最佳归并树 WPL",
+    sig: "int MergeWPL(int len[], int n, int k)",
+    ret: "返回最佳归并树的带权路径长度，也就是各归并段长度乘以它所在层数之和。",
+    vars: [
+      "len：n 个初始归并段的长度；k：归并路数。",
+      "先补若干个长度为 0 的虚段，使 (段数-1) % (k-1) == 0，这是构造严格 k 叉 Huffman 树的前提。",
+      "每次取长度最小的 k 段合并，把合并结果放回，WPL 就是所有合并结果之和。",
+    ],
+    io: "第一行 n k，第二行 n 个长度；输出 WPL。",
+    pre: ARR_PRE,
+    post: `int main(void) {
+    int len[256], n = 0, k = 0, i;
+    if (scanf("%d %d", &n, &k) != 2) return 0;
+    if (n > 256) n = 256;
+    for (i = 0; i < n; ++i) if (scanf("%d", &len[i]) != 1) return 0;
+    printf("%d\\n", MergeWPL(len, n, k));
+    return 0;
+}`,
+    std: `int MergeWPL(int len[], int n, int k) {
+    int a[512], cnt = 0, i, j, wpl = 0, sum, t;
+    if (n <= 0) return 0;
+    if (k < 2) k = 2;
+    for (i = 0; i < n; ++i) a[cnt++] = len[i];
+    while ((cnt - 1) % (k - 1) != 0) a[cnt++] = 0;
+    while (cnt > 1) {
+        for (i = 1; i < cnt; ++i) {
+            t = a[i];
+            j = i - 1;
+            while (j >= 0 && a[j] > t) {
+                a[j + 1] = a[j];
+                --j;
+            }
+            a[j + 1] = t;
+        }
+        sum = 0;
+        for (i = 0; i < k; ++i) sum += a[i];
+        wpl += sum;
+        for (i = k; i < cnt; ++i) a[i - k] = a[i];
+        cnt = cnt - k + 1;
+        a[cnt - 1] = sum;
+    }
+    return wpl;
+}`,
+    cases: [
+      { name: "教材十二段四路", stdin: "12 4\n30 44 8 6 3 20 60 18 9 62 68 85\n" },
+      { name: "四段二路", stdin: "4 2\n30 44 8 6\n" },
+      { name: "单段", stdin: "1 4\n50\n" },
+      { name: "三段三路", stdin: "3 3\n1 2 3\n" },
+    ],
+  },
+
+  "综合 6.2-05": {
+    title: "邻接矩阵平方中长度为 2 的路径条数",
+    sig: "int CountTwoStepPaths(MGraph G, int v, int u)",
+    ret: "返回 A² 中第 v 行第 u 列的元素值，也就是从 v 到 u 恰好经过两条边的路径条数。",
+    vars: [
+      "G：无向图，顶点编号 1..vexnum，G.arcs[i][j] 为 0 表示无边（对角线恒为 0），INF 表示不通。",
+      "(A²)[v][u] = Σ A[v][k]·A[k][u]，遍历所有中间顶点 k 就能数出长度为 2 的路径条数。",
+      "若 u、v 之间有边，它不会贡献到 A²，因为 k 取 u 或 v 时对应的对角元为 0。",
+    ],
+    io: "第一行 n m（顶点数与边数），随后 m 行 `u v w` 给出无向边，最后一行 v u；输出长度为 2 的路径条数。",
+    pre: MG_PRE,
+    post: `int main(void) {
+    MGraph G = BuildMG(0);
+    int v = 0, u = 0;
+    if (scanf("%d %d", &v, &u) != 2) return 0;
+    printf("%d\\n", CountTwoStepPaths(G, v, u));
+    return 0;
+}`,
+    std: `int CountTwoStepPaths(MGraph G, int v, int u) {
+    int k, cnt = 0;
+    for (k = 1; k <= G.vexnum; ++k) {
+        if (G.arcs[v][k] != INF && G.arcs[k][u] != INF) ++cnt;
+    }
+    return cnt;
+}`,
+    cases: [
+      { name: "五顶点图 1 到 4", stdin: "5 7\n1 2 1\n1 3 1\n1 5 1\n2 4 1\n2 5 1\n3 4 1\n4 5 1\n1 4\n" },
+      { name: "相邻顶点", stdin: "5 7\n1 2 1\n1 3 1\n1 5 1\n2 4 1\n2 5 1\n3 4 1\n4 5 1\n1 2\n" },
+      { name: "无二跳路径", stdin: "4 2\n1 2 1\n3 4 1\n1 4\n" },
+      { name: "自身", stdin: "3 3\n1 2 1\n2 3 1\n3 1 1\n1 1\n" },
+    ],
+  },
+
+  "综合 6.4-02": {
+    title: "有向图强连通分量的数目",
+    sig: "int CountSCC(MGraph G)",
+    ret: "返回有向图强连通分量的个数。",
+    vars: [
+      "G：有向图，顶点编号 1..vexnum，arcs[i][j] 非 INF 表示 i→j 有弧。",
+      "reach[i][j]：i 能否到达 j，用 Floyd 在可达矩阵上传递闭包。",
+      "i 与 j 互相可达时它们属于同一个强连通分量，统计一次就把整组标记掉，避免重复计数。",
+    ],
+    io: "第一行 n m（顶点数与弧数），随后 m 行 `u v w` 给出 u→v 的弧；输出强连通分量个数。",
+    pre: MG_PRE,
+    post: `int main(void) {
+    MGraph G = BuildMG(1);
+    printf("%d\\n", CountSCC(G));
+    return 0;
+}`,
+    std: `int CountSCC(MGraph G) {
+    int reach[MAXV + 1][MAXV + 1], mark[MAXV + 1];
+    int i, j, k, cnt = 0;
+    for (i = 1; i <= G.vexnum; ++i) {
+        mark[i] = 0;
+        for (j = 1; j <= G.vexnum; ++j) {
+            reach[i][j] = (i == j) || (G.arcs[i][j] != INF);
+        }
+    }
+    for (k = 1; k <= G.vexnum; ++k) {
+        for (i = 1; i <= G.vexnum; ++i) {
+            for (j = 1; j <= G.vexnum; ++j) {
+                if (reach[i][k] && reach[k][j]) reach[i][j] = 1;
+            }
+        }
+    }
+    for (i = 1; i <= G.vexnum; ++i) {
+        if (mark[i]) continue;
+        mark[i] = 1;
+        ++cnt;
+        for (j = i + 1; j <= G.vexnum; ++j) {
+            if (reach[i][j] && reach[j][i]) mark[j] = 1;
+        }
+    }
+    return cnt;
+}`,
+    cases: [
+      { name: "教材七顶点图", stdin: "7 10\n1 2 3\n1 3 3\n1 4 6\n2 3 4\n2 5 5\n3 5 4\n4 6 5\n6 3 3\n5 7 3\n6 7 7\n" },
+      { name: "一个环", stdin: "3 3\n1 2 1\n2 3 1\n3 1 1\n" },
+      { name: "一条链", stdin: "3 2\n1 2 1\n2 3 1\n" },
+      { name: "两个环", stdin: "4 4\n1 2 1\n2 1 1\n3 4 1\n4 3 1\n" },
     ],
   },
 };
