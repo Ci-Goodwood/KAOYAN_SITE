@@ -20,6 +20,37 @@ typedef struct LNode {
 } LNode, *LinkList;
 `;
 
+const TREE_PRE = `#include <stdio.h>
+#include <stdlib.h>
+typedef struct BiTNode {
+    char data;
+    struct BiTNode *lchild, *rchild;
+} BiTNode, *BiTree;
+
+BiTree BuildTree(void) {
+    char c;
+    if (scanf(" %c", &c) != 1) return NULL;
+    if (c == '#') return NULL;
+    BiTNode *p = (BiTNode *)malloc(sizeof(BiTNode));
+    p->data = c;
+    p->lchild = BuildTree();
+    p->rchild = BuildTree();
+    return p;
+}
+
+void PrintPre(BiTree T) {
+    if (T == NULL) return;
+    printf("%c", T->data);
+    PrintPre(T->lchild);
+    PrintPre(T->rchild);
+}
+`;
+
+const STR_PRE = `#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+`;
+
 function printSqList(tailCount) {
   return `    printf("%d\\n", L.length);
     for (i = 0; i < L.length; ++i) printf("%d ", L.data[i]);
@@ -515,4 +546,368 @@ ${printSqList()}`,
       { name: "空表", stdin: "0\n1\n" },
     ],
   },
+
+  "综合 5.3-08": {
+    title: "统计二叉树中双分支结点个数",
+    sig: "int CountTwo(BiTree T)",
+    ret: "返回左右孩子都不为空的结点个数；空树返回 0。",
+    vars: [
+      "BiTree：二叉链表，结点含 data（字符）、lchild、rchild。",
+      "T：根指针，可以为 NULL。",
+    ],
+    io: "输入一行扩展先序序列，# 表示空结点；输出一行为双分支结点个数。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", CountTwo(T));
+    return 0;
+}`,
+    std: `int CountTwo(BiTree T) {
+    if (T == NULL) return 0;
+    return ((T->lchild && T->rchild) ? 1 : 0) + CountTwo(T->lchild) + CountTwo(T->rchild);
+}`,
+    cases: [
+      { name: "样例", stdin: "ABD##E##CF###\n" },
+      { name: "单链", stdin: "A#B#C##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.3-09": {
+    title: "交换二叉树所有结点的左右子树",
+    sig: "void SwapTree(BiTree T)",
+    ret: "无返回值。直接改树结构，交完后整棵树的先序序列会发生变化。",
+    vars: [
+      "BiTree：二叉链表，结点含 data、lchild、rchild。",
+      "T：根指针，可能为 NULL，需先判空。",
+    ],
+    io: "输入一行扩展先序序列，# 表示空结点；输出一行为交换后的先序序列（不含 #）。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    SwapTree(T);
+    PrintPre(T);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void SwapTree(BiTree T) {
+    BiTNode *t;
+    if (T == NULL) return;
+    t = T->lchild;
+    T->lchild = T->rchild;
+    T->rchild = t;
+    SwapTree(T->lchild);
+    SwapTree(T->rchild);
+}`,
+    cases: [
+      { name: "样例", stdin: "ABD##E##CF###\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.3-10": {
+    title: "求先序序列中第 k 个结点的值",
+    sig: "char Kth(BiTree T, int k)",
+    ret: "返回先序遍历第 k 个结点的 data；k 越界（超过结点数）或树空时返回 #。",
+    vars: [
+      "k：从 1 开始计数。",
+      "可以另写辅助函数和全局计数变量，只要 Kth 的签名不变。",
+    ],
+    io: "输入扩展先序序列（# 表示空结点）和一个整数 k，用空格隔开；输出一行为该结点的字符或 #。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    int k = 0;
+    if (scanf("%d", &k) != 1) return 0;
+    printf("%c\\n", Kth(T, k));
+    return 0;
+}`,
+    std: `int cnt = 0;
+char ans = '#';
+int done = 0;
+
+void walk(BiTree T, int k) {
+    if (T == NULL || done) return;
+    cnt = cnt + 1;
+    if (cnt == k) {
+        ans = T->data;
+        done = 1;
+        return;
+    }
+    walk(T->lchild, k);
+    walk(T->rchild, k);
+}
+
+char Kth(BiTree T, int k) {
+    cnt = 0;
+    ans = '#';
+    done = 0;
+    if (k <= 0) return '#';
+    walk(T, k);
+    return ans;
+}`,
+    cases: [
+      { name: "第 5 个", stdin: "ABD##E##CF### 5\n" },
+      { name: "第 6 个", stdin: "ABD##E##CF### 6\n" },
+      { name: "越界", stdin: "ABD##E##CF### 7\n" },
+      { name: "空树", stdin: "# 1\n" },
+    ],
+  },
+
+  "综合 5.3-05": {
+    title: "非递归求二叉树的高度",
+    sig: "int Height(BiTree T)",
+    ret: "返回树的高度（根所在层为第 1 层）；空树返回 0。",
+    vars: [
+      "BiTree：二叉链表。",
+      "题目要求非递归，请用层序遍历（自己开一个结点指针数组当队列）完成。",
+    ],
+    io: "输入一行扩展先序序列，# 表示空结点；输出一行为树高。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", Height(T));
+    return 0;
+}`,
+    std: `int Height(BiTree T) {
+    BiTNode *q[1000];
+    int front = 0, rear = 0, last = 0, h = 0;
+    if (T == NULL) return 0;
+    q[rear] = T;
+    rear = rear + 1;
+    while (front < rear) {
+        BiTNode *p = q[front];
+        front = front + 1;
+        if (p->lchild) { q[rear] = p->lchild; rear = rear + 1; }
+        if (p->rchild) { q[rear] = p->rchild; rear = rear + 1; }
+        if (front - 1 == last) {
+            h = h + 1;
+            last = rear - 1;
+        }
+    }
+    return h;
+}`,
+    cases: [
+      { name: "样例", stdin: "ABD##E##CF###\n" },
+      { name: "单链", stdin: "A#B#C##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.3-14": {
+    title: "求二叉树的宽度",
+    sig: "int Width(BiTree T)",
+    ret: "返回结点数最多的那一层的结点个数；空树返回 0。",
+    vars: [
+      "BiTree：二叉链表。",
+      "宽度按层计，不是按子树计。",
+    ],
+    io: "输入一行扩展先序序列，# 表示空结点；输出一行为宽度。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", Width(T));
+    return 0;
+}`,
+    std: `int Width(BiTree T) {
+    BiTNode *q[1000];
+    int front = 0, rear = 0, last = 0, start = 0, maxw = 0, cur;
+    if (T == NULL) return 0;
+    q[rear] = T;
+    rear = rear + 1;
+    while (front < rear) {
+        BiTNode *p = q[front];
+        front = front + 1;
+        if (p->lchild) { q[rear] = p->lchild; rear = rear + 1; }
+        if (p->rchild) { q[rear] = p->rchild; rear = rear + 1; }
+        if (front - 1 == last) {
+            cur = front - start;
+            if (cur > maxw) maxw = cur;
+            start = front;
+            last = rear - 1;
+        }
+    }
+    return maxw;
+}`,
+    cases: [
+      { name: "样例", stdin: "ABD##E##CF###\n" },
+      { name: "单链", stdin: "A#B#C##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 5.3-07": {
+    title: "判别给定二叉树是否是完全二叉树",
+    sig: "int IsComplete(BiTree T)",
+    ret: "是完全二叉树返回 1，否则返回 0；空树返回 1。",
+    vars: [
+      "BiTree：二叉链表。",
+      "建议按层序入队时把空孩子也一起入队，遇到第一个空结点后若后面还有非空结点就判定为否。",
+    ],
+    io: "输入一行扩展先序序列，# 表示空结点；输出一行为 1 或 0。",
+    pre: TREE_PRE,
+    post: `int main(void) {
+    BiTree T = BuildTree();
+    printf("%d\\n", IsComplete(T));
+    return 0;
+}`,
+    std: `int IsComplete(BiTree T) {
+    BiTNode *q[1000];
+    int front = 0, rear = 0, seen = 0;
+    if (T == NULL) return 1;
+    q[rear] = T;
+    rear = rear + 1;
+    while (front < rear) {
+        BiTNode *p = q[front];
+        front = front + 1;
+        if (p == NULL) {
+            seen = 1;
+            continue;
+        }
+        if (seen) return 0;
+        q[rear] = p->lchild;
+        rear = rear + 1;
+        q[rear] = p->rchild;
+        rear = rear + 1;
+    }
+    return 1;
+}`,
+    cases: [
+      { name: "完全", stdin: "ABD##E##CF###\n" },
+      { name: "右偏缺口", stdin: "AB#E##C##\n" },
+      { name: "单结点", stdin: "A##\n" },
+      { name: "空树", stdin: "#\n" },
+    ],
+  },
+
+  "综合 3.3-01": {
+    title: "判断表达式中的括号是否配对",
+    sig: "int Match(char *s)",
+    ret: "配对返回 1，不配对返回 0（左括号多余、右括号多余、类型不匹配都算不配对）。",
+    vars: [
+      "s：以 \\0 结尾的字符串，只含圆括号、方括号、花括号，可能混有其它字符。",
+      "括号有三种类型，必须同类型才能配对，形如 ([)] 属于不配对。",
+    ],
+    io: "输入一行不含空格的表达式；输出一行为 1 或 0。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char s[512];
+    if (scanf("%511s", s) != 1) return 0;
+    printf("%d\\n", Match(s));
+    return 0;
+}`,
+    std: `int Match(char *s) {
+    char st[512];
+    int top = 0, i;
+    char c;
+    for (i = 0; s[i] != '\\0'; ++i) {
+        if (s[i] == '(' || s[i] == '[' || s[i] == '{') {
+            st[top] = s[i];
+            top = top + 1;
+        } else if (s[i] == ')' || s[i] == ']' || s[i] == '}') {
+            if (top == 0) return 0;
+            top = top - 1;
+            c = st[top];
+            if (s[i] == ')' && c != '(') return 0;
+            if (s[i] == ']' && c != '[') return 0;
+            if (s[i] == '}' && c != '{') return 0;
+        }
+    }
+    return top == 0;
+}`,
+    cases: [
+      { name: "嵌套", stdin: "{[()]}\n" },
+      { name: "顺序", stdin: "[()]{}\n" },
+      { name: "类型交叉", stdin: "([)]\n" },
+      { name: "右括号多余", stdin: "(())]\n" },
+      { name: "左括号多余", stdin: "(([])\n" },
+    ],
+  },
+
+  "综合 3.1-03": {
+    title: "判断入栈出栈操作序列是否合法",
+    sig: "int Legal(char *s)",
+    ret: "合法返回 1，非法返回 0。",
+    vars: [
+      "s：仅由 I（入栈）和 O（出栈）组成的字符串。",
+      "栈初始为空、终态为空；任何前缀里 O 的个数不能超过 I 的个数。",
+    ],
+    io: "输入一行只含 I 和 O 的序列；输出一行为 1 或 0。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char s[512];
+    if (scanf("%511s", s) != 1) return 0;
+    printf("%d\\n", Legal(s));
+    return 0;
+}`,
+    std: `int Legal(char *s) {
+    int i, net = 0;
+    for (i = 0; s[i] != '\\0'; ++i) {
+        if (s[i] == 'I') {
+            net = net + 1;
+        } else if (s[i] == 'O') {
+            net = net - 1;
+            if (net < 0) return 0;
+        }
+    }
+    return net == 0;
+}`,
+    cases: [
+      { name: "IOIO", stdin: "IOIO\n" },
+      { name: "IIOO", stdin: "IIOO\n" },
+      { name: "前缀欠账", stdin: "OIIO\n" },
+      { name: "数量不等", stdin: "IIO\n" },
+      { name: "空串", stdin: "X\n" },
+    ],
+  },
+
+  "综合 4.2-01": {
+    title: "求模式串的 next 数组",
+    sig: "void GetNext(char *p, int next[])",
+    ret: "无返回值。把 next[1..m] 填好即可，其中 m 为模式串长度。",
+    vars: [
+      "p：字符数组，下标从 1 开始存模式串（p[1] 是第一个字符），p[0] 是占位符，不用管。",
+      "next 数组同样从 1 开始使用，约定 next[1] = 0。",
+    ],
+    io: "输入一行模式串；输出一行为 next[1..m]，用空格分隔。",
+    pre: STR_PRE,
+    post: `int main(void) {
+    char raw[256], p[258];
+    int next[258];
+    int i, m;
+    if (scanf("%255s", raw) != 1) return 0;
+    m = (int)strlen(raw);
+    p[0] = '#';
+    for (i = 1; i <= m; ++i) p[i] = raw[i - 1];
+    p[m + 1] = '\\0';
+    GetNext(p, next);
+    for (i = 1; i <= m; ++i) printf("%d ", next[i]);
+    printf("\\n");
+    return 0;
+}`,
+    std: `void GetNext(char *p, int next[]) {
+    int i = 1, j = 0;
+    next[1] = 0;
+    while (p[i] != '\\0') {
+        if (j == 0 || p[i] == p[j]) {
+            i = i + 1;
+            j = j + 1;
+            next[i] = j;
+        } else {
+            j = next[j];
+        }
+    }
+}`,
+    cases: [
+      { name: "abaabcac", stdin: "abaabcac\n" },
+      { name: "aaaab", stdin: "aaaab\n" },
+      { name: "abc", stdin: "abc\n" },
+      { name: "单字符", stdin: "a\n" },
+    ],
+  },
 };
+
+
